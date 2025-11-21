@@ -19,7 +19,7 @@ the full capabilities of descriptive and regression analysis functions."><!-- ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.7</span>
       </span>
     </div>
 
@@ -205,53 +205,7 @@ the full capabilities of descriptive and regression analysis functions.</p>
 <span class="r-in"><span>                      <span class="st">"biomarker_x"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        model_type <span class="op">=</span> <span class="st">"coxph"</span>,</span></span>
 <span class="r-in"><span>        labels <span class="op">=</span> <span class="va">clintrial_labels</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Univariable Screening Results</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outcome: Surv(os_months, os_status)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Model Type: Cox PH</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Predictors Screened: 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Significant (p &lt; 0.05): 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    Variable                     Group      n Events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;char&gt;                    &lt;char&gt; &lt;char&gt; &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:             Age (years)                         -    850    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:                     Sex                    Female    474    317</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:                                              Male    376    252</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:           Disease Stage                         I    217    106</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                                                II    240    154</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                               III    251    183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                                                IV    139    123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:             Tumor Grade       Well-differentiated    171    102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                         Moderately differentiated    417    292</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                             Poorly differentiated    252    167</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: ECOG Performance Status                         0    264    143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:                                                 1    339    229</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                                 2    194    149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:                                                 3     45     42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:     Biomarker X (ng/mL)                         -    842    564</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:         Treatment Group                   Control    209    153</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:                                            Drug A    295    170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:                                            Drug B    346    246</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Univariable HR (95% CI) p-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:        1.02 (1.01-1.03) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:               reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:        0.99 (0.84-1.17)   0.899</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:               reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:        1.54 (1.20-1.97) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:        2.08 (1.64-2.65) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:        4.18 (3.21-5.44) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:               reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        1.28 (1.02-1.60)   0.032</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        1.20 (0.94-1.53)   0.148</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:               reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:        1.49 (1.21-1.84) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        1.92 (1.52-2.42) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        3.08 (2.18-4.36) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:        1.12 (1.09-1.15) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:               reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:        0.66 (0.53-0.82) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:        1.01 (0.83-1.24)   0.890</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model, conf_level = conf_level, keep_qc_stats = FALSE, include_intercept = FALSE,     add_reference_rows = add_reference_rows):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Multivariable model</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="fit.html">fit</a></span><span class="op">(</span><span class="va">clintrial</span>,</span></span>
@@ -267,27 +221,27 @@ the full capabilities of descriptive and regression analysis functions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    Variable   Group      n Events Multivariable aHR (95% CI)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;char&gt;  &lt;char&gt; &lt;char&gt; &lt;char&gt;                     &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:             Age (years)       -    836    559           1.03 (1.02-1.03)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:           Disease Stage       I    217    106                  reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:                              II    240    154           1.55 (1.21-2.00)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                             III    251    183           2.19 (1.72-2.81)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                              IV    139    123           4.34 (3.30-5.71)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: ECOG Performance Status       0    264    143                  reference</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                               1    339    229           1.50 (1.21-1.85)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                               2    194    149           2.07 (1.64-2.61)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                               3     45     42           3.55 (2.50-5.04)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:     Biomarker X (ng/mL)       -    836    559           1.09 (1.06-1.13)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:     Biomarker X (ng/mL)       -    836    559           1.09 (1.06-1.13)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: ECOG Performance Status       0    264    143                  reference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:                               1    339    229           1.50 (1.21-1.85)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                               2    194    149           2.07 (1.64-2.61)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                               3     45     42           3.55 (2.50-5.04)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:           Disease Stage       I    217    106                  reference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:                              II    240    154           1.55 (1.21-2.00)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                             III    251    183           2.19 (1.72-2.81)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                              IV    139    123           4.34 (3.30-5.71)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11:         Treatment Group Control    209    153                  reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12:                          Drug A    295    170           0.58 (0.46-0.72)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13:                          Drug B    346    246           0.88 (0.72-1.09)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     p-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1: &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:       -</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  4: &lt; 0.001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  5: &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6: &lt; 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:       -</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  8: &lt; 0.001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  9: &lt; 0.001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10: &lt; 0.001</span>
@@ -305,64 +259,7 @@ the full capabilities of descriptive and regression analysis functions.</p>
 <span class="r-in"><span>        model_type <span class="op">=</span> <span class="st">"coxph"</span>,</span></span>
 <span class="r-in"><span>        labels <span class="op">=</span> <span class="va">clintrial_labels</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Running univariable analysis...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting multivariable model with 7 predictors...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fastfit Analysis Results</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outcome: Surv(os_months, os_status)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Model Type: coxph</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Method: screen</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Multivariable predictors: 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    Variable                     Group      n Events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;char&gt;                    &lt;char&gt; &lt;char&gt; &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:             Age (years)                         -    850    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:                     Sex                    Female    474    317</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:                                              Male    376    252</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:           Disease Stage                         I    217    106</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:                                                II    240    154</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:                                               III    251    183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:                                                IV    139    123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:             Tumor Grade       Well-differentiated    171    102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:                         Moderately differentiated    417    292</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:                             Poorly differentiated    252    167</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: ECOG Performance Status                         0    264    143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:                                                 1    339    229</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:                                                 2    194    149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:                                                 3     45     42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:          Smoking Status                     Never    382    241</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:                                            Former    263    179</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:                                           Current    188    137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:     Biomarker X (ng/mL)                         -    842    564</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:       Biomarker Y (U/L)                         -    842    564</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:         Treatment Group                   Control    209    153</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:                                            Drug A    295    170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:                                            Drug B    346    246</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    Variable                     Group      n Events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Univariable HR (95% CI)   Uni p Multivariable aHR (95% CI) Multi p</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;char&gt;  &lt;char&gt;                     &lt;char&gt;  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:        1.02 (1.01-1.03) &lt; 0.001           1.03 (1.02-1.03) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:               reference       -                          -       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:        0.99 (0.84-1.17)   0.899                          -       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:               reference       -                  reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:        1.54 (1.20-1.97) &lt; 0.001           1.59 (1.23-2.04) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:        2.08 (1.64-2.65) &lt; 0.001           2.26 (1.77-2.90) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:        4.18 (3.21-5.44) &lt; 0.001           4.73 (3.58-6.24) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:               reference       -                  reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:        1.28 (1.02-1.60)   0.032           1.55 (1.23-1.96) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:        1.20 (0.94-1.53)   0.148           1.61 (1.25-2.08) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:               reference       -                  reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:        1.49 (1.21-1.84) &lt; 0.001           1.56 (1.26-1.93) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:        1.92 (1.52-2.42) &lt; 0.001           2.12 (1.67-2.69) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:        3.08 (2.18-4.36) &lt; 0.001           3.72 (2.61-5.29) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:               reference       -                  reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:        1.13 (0.93-1.37)   0.216           1.04 (0.85-1.26)   0.725</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17:        1.32 (1.07-1.62)   0.010           1.31 (1.06-1.62)   0.013</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18:        1.12 (1.09-1.15) &lt; 0.001           1.10 (1.07-1.13) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19:        1.00 (1.00-1.00)   0.763                          -       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:               reference       -                  reference       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:        0.66 (0.53-0.82) &lt; 0.001           0.59 (0.47-0.74) &lt; 0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22:        1.01 (0.83-1.24)   0.890           0.91 (0.74-1.11)   0.350</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Univariable HR (95% CI)   Uni p Multivariable aHR (95% CI) Multi p</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model, conf_level = conf_level, keep_qc_stats = FALSE, include_intercept = FALSE,     add_reference_rows = add_reference_rows):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span>        </span></span>
 </code></pre></div>
     </div>

@@ -20,7 +20,7 @@ function in the fastfit package for working with regression results."><!-- mathj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastfit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.7</span>
       </span>
     </div>
 
@@ -255,258 +255,52 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-in"><span>              data <span class="op">=</span> <span class="va">clintrial</span>, </span></span>
 <span class="r-in"><span>              family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result1</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model1):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type    variable  group     n n_group events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;      &lt;char&gt; &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable   Logistic (Intercept)          850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable   Logistic         age          850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable   Logistic         sex Female   850     474    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Multivariable   Logistic         sex   Male   850     376    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    events_group coefficient          se        coef  coef_lower coef_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;      &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:           NA -1.41428904 0.400755803 -1.41428904 -2.19975598 -0.6288221</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:           NA  0.03498124 0.006498215  0.03498124  0.02224497  0.0477175</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          317  0.00000000          NA -1.41428904 -2.19975598 -0.6288221</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          252  0.05160788 0.149743873  0.05160788 -0.24188471  0.3451005</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     exp_coef exp_lower exp_upper        OR  CI_lower  CI_upper statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.2430984 0.1108302 0.5332195 0.2430984 0.1108302 0.5332195 -3.529054</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.0356003 1.0224942 1.0488743 1.0356003 1.0224942 1.0488743  5.383207</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.2430984 0.1108302 0.5332195 1.0000000        NA        NA        NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 1.0529628 0.7851467 1.4121318 1.0529628 0.7851467 1.4121318  0.344641</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 4.170473e-04 1054.231 1068.466 1048.231      1078.811         847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 7.317030e-08 1054.231 1068.466 1048.231      1078.811         847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1054.231 1068.466 1048.231      1078.811         847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 7.303642e-01 1054.231 1068.466 1048.231      1078.811         847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.6214249    8.078865 0.4258046              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.6214249    8.078865 0.4258046              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.6214249    8.078865 0.4258046 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.6214249    8.078865 0.4258046                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result1' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Remove intercept from output</span></span></span>
 <span class="r-in"><span><span class="va">result2</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model1</span>, include_intercept <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model1, include_intercept = FALSE):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type variable  group     n n_group events events_group</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;   &lt;char&gt; &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;num&gt;        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable   Logistic      age          850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable   Logistic      sex Female   850     474    569          317</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable   Logistic      sex   Male   850     376    569          252</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    coefficient          se       coef  coef_lower coef_upper exp_coef exp_lower</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;      &lt;num&gt;       &lt;num&gt;      &lt;num&gt;    &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  0.03498124 0.006498215 0.03498124  0.02224497  0.0477175 1.035600 1.0224942</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  0.00000000          NA 0.03498124  0.02224497  0.0477175 1.035600 1.0224942</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  0.05160788 0.149743873 0.05160788 -0.24188471  0.3451005 1.052963 0.7851467</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    exp_upper       OR  CI_lower CI_upper statistic      p_value      AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;    &lt;num&gt;     &lt;num&gt;    &lt;num&gt;     &lt;num&gt;        &lt;num&gt;    &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  1.048874 1.035600 1.0224942 1.048874  5.383207 7.317030e-08 1054.231</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  1.048874 1.000000        NA       NA        NA           NA 1054.231</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  1.412132 1.052963 0.7851467 1.412132  0.344641 7.303642e-01 1054.231</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         BIC deviance null_deviance df_residual c_statistic hoslem_chi2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;       &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1068.466 1048.231      1078.811         847   0.6214249    8.078865</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1068.466 1048.231      1078.811         847   0.6214249    8.078865</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 1068.466 1048.231      1078.811         847   0.6214249    8.078865</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     hoslem_p reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.4258046              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 0.4258046 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.4258046                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result2' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 3: Logistic regression with factor variable</span></span></span>
 <span class="r-in"><span><span class="va">model3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">os_status</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">treatment</span>, </span></span>
 <span class="r-in"><span>              data <span class="op">=</span> <span class="va">clintrial</span>, </span></span>
 <span class="r-in"><span>              family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result3</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model3</span>, add_reference_rows <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model3, add_reference_rows = TRUE):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="co"># Note: reference category for treatment is included with OR = 1</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type    variable   group     n n_group events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;      &lt;char&gt;  &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable   Logistic (Intercept)           850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable   Logistic         age           850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable   Logistic   treatment Control   850     209    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Multivariable   Logistic   treatment  Drug A   850     295    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: Multivariable   Logistic   treatment  Drug B   850     346    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    events_group coefficient          se        coef  coef_lower  coef_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:           NA -1.10710134 0.421253715 -1.10710134 -1.93274345 -0.28145923</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:           NA  0.03491638 0.006564388  0.03491638  0.02205042  0.04778234</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          153  0.00000000          NA -1.10710134 -1.93274345 -0.28145923</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          170 -0.67996770 0.198955811 -0.67996770 -1.06991392 -0.29002147</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          246 -0.07264192 0.199395501 -0.07264192 -0.46344993  0.31816608</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     exp_coef exp_lower exp_upper        OR  CI_lower  CI_upper  statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.3305156 0.1447505 0.7546817 0.3305156 0.1447505 0.7546817 -2.6281106</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.0355331 1.0222953 1.0489423 1.0355331 1.0222953 1.0489423  5.3190610</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.3305156 0.1447505 0.7546817 1.0000000        NA        NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.5066334 0.3430380 0.7482475 0.5066334 0.3430380 0.7482475 -3.4176820</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 0.9299338 0.6291095 1.3746045 0.9299338 0.6291095 1.3746045 -0.3643107</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 8.586060e-03 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.043042e-07 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 6.315685e-04 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 7.156260e-01 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.6451601    6.348718 0.6082322               **       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.6451601    6.348718 0.6082322              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.6451601    6.348718 0.6082322 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.6451601    6.348718 0.6082322              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.6451601    6.348718 0.6082322                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result3' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 4: Custom confidence level and reference label</span></span></span>
 <span class="r-in"><span><span class="va">result4</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model3</span>, </span></span>
 <span class="r-in"><span>                conf_level <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
 <span class="r-in"><span>                reference_label <span class="op">=</span> <span class="st">"ref"</span>,</span></span>
 <span class="r-in"><span>                add_reference_rows <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model3, conf_level = 0.9, reference_label = "ref", add_reference_rows = TRUE):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result4</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type    variable   group     n n_group events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;      &lt;char&gt;  &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable   Logistic (Intercept)           850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable   Logistic         age           850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable   Logistic   treatment Control   850     209    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Multivariable   Logistic   treatment  Drug A   850     295    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: Multivariable   Logistic   treatment  Drug B   850     346    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    events_group coefficient          se        coef  coef_lower  coef_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:           NA -1.10710134 0.421253715 -1.10710134 -1.80000204 -0.41420064</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:           NA  0.03491638 0.006564388  0.03491638  0.02411892  0.04571384</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          153  0.00000000          NA -1.10710134 -1.80000204 -0.41420064</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:          170 -0.67996770 0.198955811 -0.67996770 -1.00722089 -0.35271451</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:          246 -0.07264192 0.199395501 -0.07264192 -0.40061834  0.25533449</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     exp_coef exp_lower exp_upper        OR  CI_lower  CI_upper  statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.3305156 0.1652986 0.6608683 0.3305156 0.1652986 0.6608683 -2.6281106</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.0355331 1.0244121 1.0467748 1.0355331 1.0244121 1.0467748  5.3190610</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.3305156 0.1652986 0.6608683 1.0000000        NA        NA         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.5066334 0.3652326 0.7027778 0.5066334 0.3652326 0.7027778 -3.4176820</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 0.9299338 0.6699057 1.2908933 0.9299338 0.6699057 1.2908933 -0.3643107</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         p_value      AIC      BIC deviance null_deviance df_residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 8.586060e-03 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.043042e-07 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 6.315685e-04 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 7.156260e-01 1039.262 1058.243 1031.262      1078.811         846</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    c_statistic hoslem_chi2  hoslem_p reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.6451601    6.348718 0.6082322               **       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.6451601    6.348718 0.6082322              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.6451601    6.348718 0.6082322       ref             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.6451601    6.348718 0.6082322              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.6451601    6.348718 0.6082322                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result4' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 5: Cox proportional hazards model</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">os_months</span>, <span class="va">os_status</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">treatment</span>, </span></span>
 <span class="r-in"><span>                data <span class="op">=</span> <span class="va">clintrial</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result5</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model5</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model5):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="co"># Returns hazard ratios (HR) instead of odds ratios</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type  variable   group     n n_group events events_group</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;    &lt;char&gt;  &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;num&gt;        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable     Cox PH       age           850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable     Cox PH       sex  Female   850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable     Cox PH       sex    Male   850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Multivariable     Cox PH treatment Control   850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: Multivariable     Cox PH treatment  Drug A   850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: Multivariable     Cox PH treatment  Drug B   850      NA    569           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    coefficient          se        coef  coef_lower  coef_upper  exp_coef</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  0.02032253 0.003556689  0.02032253  0.01335155  0.02729351 1.0205304</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  0.00000000          NA  0.02032253  0.01335155  0.02729351 1.0205304</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  0.01101920 0.084738553  0.01101920 -0.15506531  0.17710372 1.0110801</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  0.00000000          NA  0.02032253  0.01335155  0.02729351 1.0205304</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: -0.41731193 0.111722439 -0.41731193 -0.63628388 -0.19833997 0.6588154</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:  0.01396554 0.103132857  0.01396554 -0.18817114  0.21610223 1.0140635</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    exp_lower exp_upper        HR  CI_lower CI_upper  statistic      p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;    &lt;num&gt;      &lt;num&gt;        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1.0134411  1.027669 1.0205304 1.0134411 1.027669  5.7138916 1.104214e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.0134411  1.027669 1.0000000        NA       NA         NA           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.8563592  1.193755 1.0110801 0.8563592 1.193755  0.1300377 8.965366e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 1.0134411  1.027669 1.0000000        NA       NA         NA           NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 0.5292555  0.820091 0.6588154 0.5292555 0.820091 -3.7352561 1.875242e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: 0.8284729  1.241229 1.0140635 0.8284729 1.241229  0.1354131 8.922852e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    concordance concordance_se        rsq   rsq_max likelihood_ratio_test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;num&gt;          &lt;num&gt;      &lt;num&gt;     &lt;num&gt;                 &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   0.5909346     0.01279223 0.06275586 0.9997685              55.08976</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   0.5909346     0.01279223 0.06275586 0.9997685              55.08976</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   0.5909346     0.01279223 0.06275586 0.9997685              55.08976</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   0.5909346     0.01279223 0.06275586 0.9997685              55.08976</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   0.5909346     0.01279223 0.06275586 0.9997685              55.08976</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:   0.5909346     0.01279223 0.06275586 0.9997685              55.08976</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    likelihood_ratio_df likelihood_ratio_p wald_test wald_df       wald_p</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;num&gt;              &lt;num&gt;     &lt;num&gt;   &lt;num&gt;        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                   4        3.11128e-11     54.19       4 4.795285e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                   4        3.11128e-11     54.19       4 4.795285e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                   4        3.11128e-11     54.19       4 4.795285e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                   4        3.11128e-11     54.19       4 4.795285e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                   4        3.11128e-11     54.19       4 4.795285e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                   4        3.11128e-11     54.19       4 4.795285e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    score_test score_df      score_p reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;num&gt;    &lt;num&gt;        &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   54.56685        4 4.003967e-11              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   54.56685        4 4.003967e-11 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   54.56685        4 4.003967e-11                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   54.56685        4 4.003967e-11 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   54.56685        4 4.003967e-11              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:   54.56685        4 4.003967e-11                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result5' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 6: Linear model with QC statistics</span></span></span>
 <span class="r-in"><span><span class="va">model6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">bmi</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">smoking</span>, data <span class="op">=</span> <span class="va">clintrial</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result6</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model6</span>, keep_qc_stats <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model6, keep_qc_stats = TRUE):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="co"># Includes R-squared, AIC, BIC, etc.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result6</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type    variable   group     n n_group events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;      &lt;char&gt;  &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable     Linear (Intercept)           833      NA     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable     Linear         age           833      NA     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable     Linear         sex  Female   833     463     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Multivariable     Linear         sex    Male   833     370     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: Multivariable     Linear     smoking   Never   833     382     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: Multivariable     Linear     smoking  Former   833     263     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: Multivariable     Linear     smoking Current   833     188     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    events_group coefficient         se        coef   coef_lower  coef_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;       &lt;num&gt;      &lt;num&gt;       &lt;num&gt;        &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:           NA 26.49341635 0.94897913 26.49341635 24.633451442 28.35338126</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:           NA  0.03068019 0.01480286  0.03068019  0.001667128  0.05969326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA  0.00000000         NA 26.49341635 24.633451442 28.35338126</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:           NA -0.05512031 0.35234442 -0.05512031 -0.745702689  0.63546206</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:           NA  0.00000000         NA 26.49341635 24.633451442 28.35338126</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:           NA -0.65712937 0.40435353 -0.65712937 -1.449647726  0.13538899</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:           NA -0.06267764 0.44946937 -0.06267764 -0.943621414  0.81826613</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        exp_coef    exp_lower    exp_upper    Estimate     CI_lower    CI_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;        &lt;num&gt;        &lt;num&gt;       &lt;num&gt;        &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3.205860e+11 4.990821e+10 2.059288e+12 26.49341635 24.633451442 28.35338126</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 1.031156e+00 1.001669e+00 1.061511e+00  0.03068019  0.001667128  0.05969326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 3.205860e+11 4.990821e+10 2.059288e+12  0.00000000           NA          NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 9.463713e-01 4.744008e-01 1.887894e+00 -0.05512031 -0.745702689  0.63546206</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 3.205860e+11 4.990821e+10 2.059288e+12  0.00000000           NA          NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: 5.183372e-01 2.346529e-01 1.144982e+00 -0.65712937 -1.449647726  0.13538899</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: 9.392462e-01 3.892158e-01 2.266567e+00 -0.06267764 -0.943621414  0.81826613</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     statistic       p_value          R2      adj_R2     AIC     BIC    sigma</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;num&gt;         &lt;num&gt;       &lt;num&gt;       &lt;num&gt;   &lt;num&gt;   &lt;num&gt;    &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 27.9178073 2.129198e-121 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  2.0725861  3.851974e-02 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:         NA            NA 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: -0.1564387  8.757253e-01 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:         NA            NA 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: -1.6251357  1.045142e-01 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: -0.1394481  8.891300e-01 0.008429109 0.003638911 5065.97 5094.32 5.041315</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    df_residual reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;int&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:         828              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:         828                *       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:         828 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:         828                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:         828 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:         828                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7:         828                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result6' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 7: Exclude specific terms</span></span></span>
 <span class="r-in"><span><span class="va">model7</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">os_status</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">treatment</span> <span class="op">+</span> <span class="va">site</span>, </span></span>
@@ -515,122 +309,36 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-in"><span><span class="va">result7</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model7</span>, </span></span>
 <span class="r-in"><span>                terms_to_exclude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"siteB"</span>, <span class="st">"siteC"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                include_intercept <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model7, terms_to_exclude = c("siteB", "siteC"), include_intercept = FALSE):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result7</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       model_scope model_type  variable        group     n n_group events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;char&gt;     &lt;char&gt;    &lt;char&gt;       &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1: Multivariable   Logistic       age                850      NA    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2: Multivariable   Logistic       sex       Female   850     474    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: Multivariable   Logistic       sex         Male   850     376    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4: Multivariable   Logistic treatment      Control   850     209    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5: Multivariable   Logistic treatment       Drug A   850     295    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: Multivariable   Logistic treatment       Drug B   850     346    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7: Multivariable   Logistic      site   Site Alpha   850      81    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: Multivariable   Logistic      site    Site Beta   850      87    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: Multivariable   Logistic      site   Site Gamma   850      91    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10: Multivariable   Logistic      site   Site Delta   850      87    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: Multivariable   Logistic      site Site Epsilon   850      85    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: Multivariable   Logistic      site    Site Zeta   850      85    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13: Multivariable   Logistic      site     Site Eta   850      86    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14: Multivariable   Logistic      site   Site Theta   850      75    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15: Multivariable   Logistic      site    Site Iota   850      74    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16: Multivariable   Logistic      site   Site Kappa   850      99    569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     events_group coefficient          se        coef  coef_lower  coef_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:           NA  0.03579749 0.006650163  0.03579749  0.02276341  0.04883157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:          317  0.00000000          NA  0.03579749  0.02276341  0.04883157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:          252  0.05585657 0.152981026  0.05585657 -0.24398073  0.35569387</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:          153  0.00000000          NA  0.03579749  0.02276341  0.04883157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:          170 -0.71551811 0.203108965 -0.71551811 -1.11360437 -0.31743185</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:          246 -0.11214915 0.202902218 -0.11214915 -0.50983019  0.28553189</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:           53  0.00000000          NA  0.03579749  0.02276341  0.04883157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:           63  0.36563028 0.344300160  0.36563028 -0.30918563  1.04044620</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:           56 -0.27295301 0.329028344 -0.27295301 -0.91783671  0.37193070</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:           52 -0.26336363 0.328998523 -0.26336363 -0.90818889  0.38146162</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:           54 -0.10671161 0.334990798 -0.10671161 -0.76328151  0.54985829</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:           65  0.50732979 0.357080796  0.50732979 -0.19253571  1.20719529</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:           58  0.09365295 0.337606758  0.09365295 -0.56804414  0.75535004</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:           48 -0.10983116 0.344428964 -0.10983116 -0.78489953  0.56523720</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:           56  0.52930807 0.368194947  0.52930807 -0.19234077  1.25095690</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:           64 -0.01457661 0.324808978 -0.01457661 -0.65119051  0.62203729</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      exp_coef exp_lower exp_upper        OR  CI_lower  CI_upper   statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1: 1.0364459 1.0230245 1.0500435 1.0364459 1.0230245 1.0500435  5.38294875</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2: 1.0364459 1.0230245 1.0500435 1.0000000        NA        NA          NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 1.0574460 0.7835027 1.4271706 1.0574460 0.7835027 1.4271706  0.36512090</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4: 1.0364459 1.0230245 1.0500435 1.0000000        NA        NA          NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5: 0.4889387 0.3283732 0.7280163 0.4889387 0.3283732 0.7280163 -3.52282879</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: 0.8939109 0.6005976 1.3304695 0.8939109 0.6005976 1.3304695 -0.55272509</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7: 1.0364459 1.0230245 1.0500435 1.0000000        NA        NA          NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: 1.4414222 0.7340445 2.8304797 1.4414222 0.7340445 2.8304797  1.06195211</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: 0.7611286 0.3993821 1.4505325 0.7611286 0.3993821 1.4505325 -0.82957293</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10: 0.7684624 0.4032539 1.4644235 0.7684624 0.4032539 1.4644235 -0.80050095</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: 0.8987848 0.4661343 1.7330074 0.8987848 0.4661343 1.7330074 -0.31855086</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 1.6608505 0.8248649 3.3440923 1.6608505 0.8248649 3.3440923  1.42077030</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13: 1.0981786 0.5666326 2.1283564 1.0981786 0.5666326 2.1283564  0.27740247</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14: 0.8959854 0.4561655 1.7598652 0.8959854 0.4561655 1.7598652 -0.31887899</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15: 1.6977572 0.8250257 3.4936845 1.6977572 0.8250257 3.4936845  1.43757559</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16: 0.9855291 0.5214246 1.8627191 0.9855291 0.5214246 1.8627191 -0.04487748</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          p_value      AIC    BIC deviance null_deviance df_residual c_statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;    &lt;num&gt;  &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;       &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1: 7.327540e-08 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:           NA 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 7.150212e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:           NA 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5: 4.269671e-04 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: 5.804517e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:           NA 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8: 2.882574e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: 4.067803e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10: 4.234206e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11: 7.500671e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 1.553835e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13: 7.814711e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14: 7.498183e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15: 1.505545e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16: 9.642050e-01 1046.167 1112.6 1018.167      1078.811         836   0.6635041</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     hoslem_chi2  hoslem_p reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;     &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:    4.235673 0.8352588              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    4.235673 0.8352588 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:    4.235673 0.8352588 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:    4.235673 0.8352588              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:    4.235673 0.8352588 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:    4.235673 0.8352588                       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:    4.235673 0.8352588                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result7' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 8: Access model attributes</span></span></span>
 <span class="r-in"><span><span class="va">result8</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model1):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result8</span>, <span class="st">"model_class"</span><span class="op">)</span>    <span class="co"># "glm"</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "glm"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result8' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result8</span>, <span class="st">"model_family"</span><span class="op">)</span>   <span class="co"># "binomial"</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "binomial"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result8' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result8</span>, <span class="st">"conf_level"</span><span class="op">)</span>     <span class="co"># 0.95</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.95</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result8' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 9: Univariable vs Multivariable detection</span></span></span>
 <span class="r-in"><span><span class="va">uni_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">os_status</span> <span class="op">~</span> <span class="va">age</span>, </span></span>
 <span class="r-in"><span>                 data <span class="op">=</span> <span class="va">clintrial</span>, </span></span>
 <span class="r-in"><span>                 family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">uni_result</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">uni_model</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(uni_model):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">uni_result</span><span class="op">$</span><span class="va">model_scope</span><span class="op">)</span>  <span class="co"># "Univariable"</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Univariable" "Univariable"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'uni_result' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">multi_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">os_status</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">treatment</span>, </span></span>
 <span class="r-in"><span>                   data <span class="op">=</span> <span class="va">clintrial</span>, </span></span>
 <span class="r-in"><span>                   family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">multi_result</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">multi_model</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(multi_model):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_result</span><span class="op">$</span><span class="va">model_scope</span><span class="op">)</span>  <span class="co"># "Multivariable"</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Multivariable" "Multivariable" "Multivariable" "Multivariable"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "Multivariable" "Multivariable" "Multivariable"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'multi_result' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 10: Poisson regression for count data</span></span></span>
 <span class="r-in"><span><span class="va">model10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">los_days</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">treatment</span>, </span></span>
@@ -1376,43 +1084,10 @@ categories of factor variables with:</p><ul><li><p>Effect estimate = 1 (for OR/H
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>non-integer x = 21.500000</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>non-integer x = 26.600000</span>
 <span class="r-in"><span><span class="va">result10</span> <span class="op">&lt;-</span> <span class="fu">m2dt</span><span class="op">(</span><span class="va">model10</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in m2dt(model10):</span> data must be a data.frame or data.table</span>
 <span class="r-in"><span><span class="co"># Returns rate ratios (RR)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      model_scope model_type    variable   group     n n_group events</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;     &lt;char&gt;      &lt;char&gt;  &lt;char&gt; &lt;int&gt;   &lt;num&gt;  &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Multivariable    Poisson (Intercept)           830      NA     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Multivariable    Poisson         age           830      NA     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Multivariable    Poisson   treatment Control   830     209     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Multivariable    Poisson   treatment  Drug A   830     295     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: Multivariable    Poisson   treatment  Drug B   830     346     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    events_group  coefficient           se         coef   coef_lower</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;        &lt;num&gt;        &lt;num&gt;        &lt;num&gt;        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:           NA  2.697127566 0.0452885109  2.697127566  2.608363716</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:           NA  0.003722235 0.0006826637  0.003722235  0.002384238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:           NA  0.000000000           NA  2.697127566  2.608363716</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:           NA -0.041212651 0.0213588410 -0.041212651 -0.083075210</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:           NA  0.019926580 0.0204404699  0.019926580 -0.020136005</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      coef_upper  exp_coef  exp_lower exp_upper        RR   CI_lower  CI_upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;     &lt;num&gt;      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 2.7858914162 14.837052 13.5768171 16.214265 14.837052 13.5768171 16.214265</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 0.0050602311  1.003729  1.0023871  1.005073  1.003729  1.0023871  1.005073</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 2.7858914162 14.837052 13.5768171 16.214265  1.000000         NA        NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.0006499083  0.959625  0.9202819  1.000650  0.959625  0.9202819  1.000650</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 0.0599891644  1.020126  0.9800654  1.061825  1.020126  0.9800654  1.061825</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     statistic      p_value   AIC   BIC deviance null_deviance df_residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;num&gt;        &lt;num&gt; &lt;num&gt; &lt;num&gt;    &lt;num&gt;         &lt;num&gt;       &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 59.5543442 0.000000e+00   Inf   Inf 655.3075      696.2629         826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  5.4525158 4.966215e-08   Inf   Inf 655.3075      696.2629         826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:         NA           NA   Inf   Inf 655.3075      696.2629         826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: -1.9295359 5.366437e-02   Inf   Inf 655.3075      696.2629         826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:  0.9748592 3.296301e-01   Inf   Inf 655.3075      696.2629         826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            R2 reference    sig sig_binary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;num&gt;    &lt;char&gt; &lt;char&gt;     &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0.05882169              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 0.05882169              ***       TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 0.05882169 reference             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 0.05882169                .      FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: 0.05882169                       FALSE</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'result10' not found</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
