@@ -460,7 +460,12 @@ fit <- function(data,
     }
     
     ## Store the data directly in the model
-    model$data <- data
+    if (isS4(model)) {
+        attr(model, "data") <- data
+    } else {
+        model$data <- data
+        attr(model, "data") <- data
+    }
     
     ## Attach metadata as attributes
     data.table::setattr(model, "formula_str", formula_str)
@@ -482,7 +487,8 @@ fit <- function(data,
     }
     
     ## Convert to readable format using m2dt
-    raw_data <- m2dt(model, 
+    raw_data <- m2dt(data,
+                     model, 
                      conf_level = conf_level,
                      keep_qc_stats = keep_qc_stats,
                      include_intercept = FALSE,

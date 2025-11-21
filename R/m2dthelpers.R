@@ -1,3 +1,64 @@
+#' Get factor levels from model (works with S3 and S4)
+#' @keywords internal
+get_model_xlevels <- function(model) {
+    
+    ## For regular S3 models (glm, lm, coxph, clogit)
+    if (!isS4(model)) {
+        ## Special handling for coxme - it doesn't store xlevels
+        if (inherits(model, "coxme")) {
+            return(NULL)  # Will be handled separately
+        }
+        return(model$xlevels)
+    }
+    
+    ## For S4 lme4 models (glmer, lmer)
+    if (inherits(model, "merMod")) {
+        ## Extract from the model frame
+        frame_data <- model@frame
+        
+        xlevels <- list()
+        for (var_name in names(frame_data)) {
+            if (is.factor(frame_data[[var_name]])) {
+                xlevels[[var_name]] <- levels(frame_data[[var_name]])
+            }
+        }
+        
+        return(if (length(xlevels) > 0) xlevels else NULL)
+    }
+    
+    ## Default: return NULL
+    return(NULL)
+}
+
+#' Get data from model object (works with S3 and S4)
+#' @keywords internal
+get_model_data <- function(model) {
+    
+    ## Try attribute first
+    data_attr <- attr(model, "data")
+    if (!is.null(data_attr)) {
+        return(data_attr)
+    }
+    
+    ## For S3 objects, try model$data
+    if (!isS4(model)) {
+        if (!is.null(model$data)) {
+            return(model$data)
+        }
+        if (!is.null(model$model)) {
+            return(model$model)
+        }
+    }
+    
+    ## For S4 lme4 objects, use model frame
+    if (inherits(model, "merMod")) {
+        return(model@frame)
+    }
+    
+    ## Default
+    return(NULL)
+}
+
 #' Detect if model is univariable or multivariable
 #' @keywords internal
 detect_model_type <- function(model) {
@@ -17,7 +78,29 @@ detect_model_type <- function(model) {
     main_terms <- term_names[!is_interaction]
     
     ## For models without factor variables, count unique base variables from main effects
-    if (is.null(model$xlevels) || length(model$xlevels) == 0) {
+    xlevels <- get_model_xlevels(model)
+    
+    ## Special handling for coxme - reconstruct factor info
+    if (inherits(model, "coxme") && is.null(xlevels)) {
+        data_source <- get_model_data(model)
+        if (!is.null(data_source)) {
+            xlevels <- list()
+            formula_vars <- all.vars(stats::formula(model))
+            if (length(formula_vars) >= 2) {
+                predictor_vars <- formula_vars[-(1:2)]  # Remove Surv components
+                predictor_vars <- predictor_vars[!grepl("\\|", predictor_vars)]  # Remove random effects
+                
+                for (var in predictor_vars) {
+                    if (var %in% names(data_source) && is.factor(data_source[[var]])) {
+                        xlevels[[var]] <- levels(data_source[[var]])
+                    }
+                }
+            }
+            if (length(xlevels) == 0) xlevels <- NULL
+        }
+    }
+    
+    if (is.null(xlevels) || length(xlevels) == 0) {
         ## Count main effect terms
         n_terms <- length(main_terms)
         
@@ -34,10 +117,10 @@ detect_model_type <- function(model) {
     }
     
     ## For models with factor variables, count unique base variables
-    factor_pattern <- paste0("^(", paste(names(model$xlevels), collapse = "|"), ")")
+    factor_pattern <- paste0("^(", paste(names(xlevels), collapse = "|"), ")")
     is_factor_term <- grepl(factor_pattern, main_terms)
     factor_vars_present <- unique(sapply(main_terms[is_factor_term], function(term) {
-        for (var in names(model$xlevels)) {
+        for (var in names(xlevels)) {
             if (startsWith(term, var)) return(var)
         }
         return(NA_character_)
@@ -89,7 +172,8 @@ get_model_type_name <- function(model) {
                   coxph = "Cox PH",
                   clogit = "Conditional Logistic",
                   coxme = "Mixed Effects Cox",
-                  glmer = "Mixed Effects GLM",
+                  glmer = "glmerMod",  # Keep full name for clarity
+                  glmerMod = "glmerMod",
                   lmer = "Mixed Effects Linear",
                   model_class  # default
                   ))
@@ -97,7 +181,7 @@ get_model_type_name <- function(model) {
 
 #' Parse term into variable and group
 #' @keywords internal
-parse_term <- function(terms, xlevels = NULL) {
+parse_term <- function(terms, xlevels = NULL, model = NULL) {
     n_terms <- length(terms)
     
     ## Initialize result vectors
@@ -106,7 +190,37 @@ parse_term <- function(terms, xlevels = NULL) {
     
     ## Interactions should not be parsed as factor variables
     is_interaction <- grepl(":", terms, fixed = TRUE)
-    
+
+    ## Special handling for coxme models - reconstruct xlevels if needed
+    if (!is.null(model) && inherits(model, "coxme") && is.null(xlevels)) {
+        data_source <- attr(model, "data")
+        if (is.null(data_source)) {
+            data_source <- get_model_data(model)
+        }
+        
+        if (!is.null(data_source)) {
+            xlevels <- list()
+            
+            ## Extract factor structure from coefficient names
+            coef_names <- names(coxme::fixef(model))
+            
+            ## Check each column in the data
+            for (col_name in names(data_source)) {
+                ## Check if any coefficient starts with this column name
+                if (any(grepl(paste0("^", col_name), coef_names))) {
+                    ## This is a factor variable - get its levels
+                    if (is.factor(data_source[[col_name]])) {
+                        xlevels[[col_name]] <- levels(data_source[[col_name]])
+                    } else if (is.character(data_source[[col_name]])) {
+                        xlevels[[col_name]] <- sort(unique(data_source[[col_name]]))
+                    }
+                }
+            }
+            
+            if (length(xlevels) == 0) xlevels <- NULL
+        }
+    }
+   
     if (!is.null(xlevels) && length(xlevels) > 0) {
         ## OPTIMIZED: Vectorized approach
         xlevel_names <- names(xlevels)
@@ -138,4 +252,47 @@ parse_term <- function(terms, xlevels = NULL) {
     }
     
     return(data.table::data.table(variable = variable, group = group))
+}
+
+#' Extract event variable from survival model
+#' @keywords internal
+get_event_variable <- function(model, model_class) {
+    event_var <- NULL
+    
+    if (model_class %in% c("coxph", "clogit", "coxme")) {
+        
+        ## Get the formula string differently for each model type
+        outcome_str <- NULL
+        
+        if (model_class == "coxme") {
+            ## For coxme, use formulaList$fixed
+            if (!is.null(model$formulaList$fixed)) {
+                outcome_str <- tryCatch({
+                    as.character(model$formulaList$fixed)[2]
+                }, error = function(e) NULL)
+            }
+        } else {
+            ## For coxph and clogit, use standard formula
+            outcome_str <- tryCatch({
+                as.character(stats::formula(model))[2]
+            }, error = function(e) NULL)
+        }
+        
+        ## Extract event variable from Surv()
+        if (!is.null(outcome_str) && !is.na(outcome_str)) {
+            if (grepl("Surv\\(", outcome_str)) {
+                ## Remove "Surv(" from beginning and ")" from end
+                surv_expr <- gsub("^Surv\\(", "", outcome_str)
+                surv_expr <- gsub("\\)$", "", surv_expr)
+                
+                ## Split by comma to get time and event
+                surv_parts <- trimws(strsplit(surv_expr, ",")[[1]])
+                if (length(surv_parts) >= 2) {
+                    event_var <- surv_parts[2]
+                }
+            }
+        }
+    }
+    
+    return(event_var)
 }

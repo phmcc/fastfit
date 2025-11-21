@@ -154,42 +154,61 @@ format_model_table <- function(data,
         result[Group == "", Group := "-"]
     }
 
-    ## Format sample size BEFORE eliminating repeated variable names - OPTIMIZED
+    ## IMPORTANT FIX: Format sample size - prioritize n_group where available
+    ## This is the key fix for mixed models
     if ("n" %in% names(result)) {
-                                        # Use n_group where available, otherwise use n
+        ## Create a display_n column that uses n_group where available, n otherwise
         if ("n_group" %in% names(result)) {
-            result[!is.na(n_group), n := n_group]
+            ## For rows with n_group data (factor levels), use n_group
+            ## For rows without n_group (continuous vars, reference rows), use total n
+            result[, display_n := data.table::fifelse(!is.na(n_group), n_group, n)]
+        } else {
+            ## No n_group column, just use n
+            result[, display_n := n]
         }
         
-                                        # Convert to character and format with commas in one step
+        ## Format the display_n column with commas
         result[, n := data.table::fcase(
-                                      is.na(n), NA_character_,
-                                      n >= 1000, format(n, big.mark = ","),
-                                      default = as.character(n)
+                                      is.na(display_n), NA_character_,
+                                      display_n >= 1000, format(display_n, big.mark = ","),
+                                      default = as.character(display_n)
                                   )]
+        
+        ## Clean up temporary column
+        result[, display_n := NULL]
     }
 
-    ## Similar optimization for events
+    ## Similar fix for events
     if ("events" %in% names(result)) {
+        ## Create a display_events column that uses events_group where available
         if ("events_group" %in% names(result)) {
-            result[!is.na(events_group), events := events_group]
+            ## For rows with events_group data (factor levels), use events_group
+            ## For rows without events_group (continuous vars, reference rows), use total events
+            result[, display_events := data.table::fifelse(!is.na(events_group), events_group, events)]
+        } else {
+            ## No events_group column, just use events
+            result[, display_events := events]
         }
         
+        ## Format the display_events column with commas
         result[, events := data.table::fcase(
-                                           is.na(events), NA_character_,
-                                           events >= 1000, format(events, big.mark = ","),
-                                           default = as.character(events)
+                                           is.na(display_events), NA_character_,
+                                           display_events >= 1000, format(display_events, big.mark = ","),
+                                           default = as.character(display_events)
                                        )]
+        
+        ## Clean up temporary column
+        result[, display_events := NULL]
     }
     
     ## Eliminate repeated variable names - OPTIMIZED VECTORIZED VERSION
     if ("Variable" %in% names(result) && nrow(result) > 1) {
-                                        # Create a logical vector indicating where variable changes
-                                        # TRUE for first occurrence, FALSE for repeats
+        ## Create a logical vector indicating where variable changes
+        ## TRUE for first occurrence, FALSE for repeats
         n_rows <- nrow(result)
         is_new_var <- c(TRUE, result$Variable[-1] != result$Variable[-n_rows])
         
-                                        # Set non-first occurrences to empty string
+        ## Set non-first occurrences to empty string
         result[!is_new_var, Variable := ""]
     }
     

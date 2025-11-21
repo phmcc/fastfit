@@ -80,224 +80,110 @@
 #'     \item{reference}{Character. Contains \code{reference_label} for reference 
 #'       category rows when \code{add_reference_rows = TRUE}, empty string otherwise}
 #'   }
-#'   
-#'   Additional quality control columns when \code{keep_qc_stats = TRUE} (vary by 
-#'   model type):
-#'   \describe{
-#'     \item{GLM models}{AIC, BIC, deviance, null_deviance, df_residual. For logistic 
-#'       regression: c_statistic (concordance/AUC)}
-#'     \item{LM models}{R2 (R-squared), adj_R2 (adjusted R-squared), sigma (residual 
-#'       standard error), df_residual}
-#'     \item{Cox models}{concordance (C-index), rsq (R-squared approximation), 
-#'       logtest_stat, logtest_p (likelihood ratio test), wald_test, wald_p 
-#'       (Wald test), score_test, score_p (score test)}
-#'   }
-#'   
-#'   The output includes the following attributes accessible via \code{attr()}:
-#'   \describe{
-#'     \item{model_class}{Character. The class of the input model object}
-#'     \item{model_family}{Character. The family for GLM models (e.g., "binomial", 
-#'       "gaussian"); \code{NA} for non-GLM models}
-#'     \item{conf_level}{Numeric. The confidence level used for intervals}
-#'   }
 #'
-#' @details
-#' This function automatically detects whether a model is univariable or multivariable 
-#' by counting the number of unique predictor variables (accounting for factor 
-#' variable expansion). It handles factor variables intelligently by:
-#' \itemize{
-#'   \item Parsing factor terms into base variable names and levels
-#'   \item Computing group-specific sample sizes and event counts
-#'   \item Optionally adding reference category rows with OR/HR = 1
-#'   \item Maintaining factor level ordering from the original model
-#' }
-#' 
-#' For logistic regression (\code{glm} with \code{family = binomial}), the function 
-#' returns odds ratios (OR). For Cox models, it returns hazard ratios (HR). For 
-#' Poisson regression, it returns rate/risk ratios (RR). For linear models and 
-#' other GLMs, it returns the raw coefficient estimates.
-#' 
-#' The function calculates confidence intervals using the normal approximation 
-#' (z-score method) for all model types, which is appropriate for large samples.
-#' 
-#' When \code{add_reference_rows = TRUE}, the function adds rows for reference 
-#' categories of factor variables with:
-#' \itemize{
-#'   \item Effect estimate = 1 (for OR/HR/RR) or 0 (for Estimate)
-#'   \item Coefficient = 0
-#'   \item Standard error, statistic, p-value, and CI bounds = NA
-#'   \item Group-specific sample sizes and event counts calculated from the data
-#'   \item The \code{reference} column populated with \code{reference_label}
-#' }
-#'
-#' @seealso 
-#' \code{\link{glm}}, \code{\link{lm}}, \code{\link[survival]{coxph}}, 
-#' \code{\link[survival]{clogit}}, \code{\link[lme4]{glmer}}
-#' 
-#' @examples
-#' # Load example data
-#' data(clintrial)
-#' 
-#' # Example 1: Simple logistic regression
-#' model1 <- glm(os_status ~ age + sex, 
-#'               data = clintrial, 
-#'               family = binomial)
-#' result1 <- m2dt(model1)
-#' print(result1)
-#' 
-#' # Example 2: Remove intercept from output
-#' result2 <- m2dt(model1, include_intercept = FALSE)
-#' print(result2)
-#' 
-#' # Example 3: Logistic regression with factor variable
-#' model3 <- glm(os_status ~ age + treatment, 
-#'               data = clintrial, 
-#'               family = binomial)
-#' result3 <- m2dt(model3, add_reference_rows = TRUE)
-#' # Note: reference category for treatment is included with OR = 1
-#' print(result3)
-#' 
-#' # Example 4: Custom confidence level and reference label
-#' result4 <- m2dt(model3, 
-#'                 conf_level = 0.90,
-#'                 reference_label = "ref",
-#'                 add_reference_rows = TRUE)
-#' print(result4)
-#' 
-#' # Example 5: Cox proportional hazards model
-#' library(survival)
-#' model5 <- coxph(Surv(os_months, os_status) ~ age + sex + treatment, 
-#'                 data = clintrial)
-#' result5 <- m2dt(model5)
-#' # Returns hazard ratios (HR) instead of odds ratios
-#' print(result5)
-#' 
-#' # Example 6: Linear model with QC statistics
-#' model6 <- lm(bmi ~ age + sex + smoking, data = clintrial)
-#' result6 <- m2dt(model6, keep_qc_stats = TRUE)
-#' # Includes R-squared, AIC, BIC, etc.
-#' print(result6)
-#' 
-#' # Example 7: Exclude specific terms
-#' model7 <- glm(os_status ~ age + sex + treatment + site, 
-#'               data = clintrial, 
-#'               family = binomial)
-#' result7 <- m2dt(model7, 
-#'                 terms_to_exclude = c("siteB", "siteC"),
-#'                 include_intercept = FALSE)
-#' print(result7)
-#' 
-#' # Example 8: Access model attributes
-#' result8 <- m2dt(model1)
-#' attr(result8, "model_class")    # "glm"
-#' attr(result8, "model_family")   # "binomial"
-#' attr(result8, "conf_level")     # 0.95
-#' 
-#' # Example 9: Univariable vs Multivariable detection
-#' uni_model <- glm(os_status ~ age, 
-#'                  data = clintrial, 
-#'                  family = binomial)
-#' uni_result <- m2dt(uni_model)
-#' print(uni_result$model_scope)  # "Univariable"
-#' 
-#' multi_model <- glm(os_status ~ age + sex + treatment, 
-#'                    data = clintrial, 
-#'                    family = binomial)
-#' multi_result <- m2dt(multi_model)
-#' print(multi_result$model_scope)  # "Multivariable"
-#' 
-#' # Example 10: Poisson regression for count data
-#' model10 <- glm(los_days ~ age + treatment, 
-#'                data = clintrial, 
-#'                family = poisson)
-#' result10 <- m2dt(model10)
-#' # Returns rate ratios (RR)
-#' print(result10)
-#' 
 #' @export
-m2dt <- function(model, 
+m2dt <- function(data,
+                 model,
                  conf_level = 0.95,
                  keep_qc_stats = TRUE,
                  include_intercept = TRUE,
                  terms_to_exclude = NULL,
                  add_reference_rows = TRUE,
                  reference_label = "reference") {
-    
-    ## Handle intercept exclusion
-    if (!include_intercept) {
-        if (is.null(terms_to_exclude)) {
-            terms_to_exclude <- "(Intercept)"
-        } else {
-            terms_to_exclude <- unique(c(terms_to_exclude, "(Intercept)"))
-        }
+
+    ## Validate inputs
+    if (missing(data)) {
+        stop("data parameter is required. Usage: m2dt(data, model)")
     }
     
-    ## If terms_to_exclude is still NULL at this point, set it to empty character vector (no exclusions)
-    if (is.null(terms_to_exclude)) {
-        terms_to_exclude <- character(0)
+    if (!inherits(data, c("data.frame", "data.table"))) {
+        stop("data must be a data.frame or data.table")
     }
     
+    ## Store data for use throughout function
+    model_data <- data.table::as.data.table(data)
+    
+    ## Store as attribute for helper functions
+    attr(model, "data") <- model_data
+
+    ## Set model class
     model_class <- class(model)[1]
     
-    ## Remove mmodel class if present to get underlying model type
-    if (model_class == "mmodel") {
-        model_class <- class(model)[2]
+    ## Null operator for handling missing values
+    `%||%` <- function(a, b) if (is.null(a)) b else a
+    
+    ## Add intercept to exclusion list if requested
+    if (!include_intercept) {
+        terms_to_exclude <- unique(c(terms_to_exclude, "(Intercept)"))
     }
-
-    ## Auto-detect model type if not specified
+    
+    ## Get model type (Univariable vs Multivariable)
     model_scope <- detect_model_type(model)
-
-    ## Get model type name
+    
+    ## Get readable model type name
     model_type_name <- get_model_type_name(model)
     
-    ## Initialize base data.table
-    dt <- data.table::data.table()
-    
-    ## Extract based on model type
+    ## Extract results based on model class
     if (model_class %in% c("glm", "lm")) {
         
-        coef_summary <- stats::coef(summary(model))
-        z_score <- stats::qnorm((1 + conf_level) / 2)
-        
-        ## Determine effect measure
-        is_logistic <- model_class == "glm" && model$family$family == "binomial"
-        is_poisson <- model_class == "glm" && model$family$family == "poisson"
-        should_exp <- is_logistic || is_poisson || 
-            (model_class == "glm" && model$family$link == "log")
-        
-        effect_name <- if (is_logistic) "OR" else if (is_poisson) "RR" else "Estimate"
-
-        ## Events calculation for logistic regression
-        events_value <- NA_integer_
-        if (is_logistic && !is.null(model$y)) {
-            if (is.factor(model$y)) {
-                ## Convert factor to numeric (assumes binary factor with levels 0/1 or similar)
-                events_value <- sum(as.numeric(model$y) == 2)  # Second level is typically "Yes" or "1"
-            } else {
-                events_value <- sum(model$y)
-            }
-        }
+        coef_summary <- summary(model)$coefficients
+        conf_int <- stats::confint.default(model, level = conf_level)
         
         dt <- data.table::data.table(
-                              model_scope = model_scope %||% "Multivariable",
+                              model_scope = model_scope,
                               model_type = model_type_name,
                               term = rownames(coef_summary),
                               n = stats::nobs(model),
-                              events = events_value,
+                              events = NA_integer_,
                               coefficient = coef_summary[, "Estimate"],
                               se = coef_summary[, "Std. Error"]
                           )
-
+        
+        ## Calculate confidence intervals
+        z_score <- stats::qnorm((1 + conf_level) / 2)
         dt[, `:=`(
-            ## Raw coefficients
             coef = coefficient,
             coef_lower = coefficient - z_score * se,
-            coef_upper = coefficient + z_score * se,
+            coef_upper = coefficient + z_score * se
+        )]
+        
+        ## Special handling for logistic regression
+        if (model_class == "glm" && !isS4(model)) {
+            if (model$family$family == "binomial") {
+                if (!is.null(model$y)) {
+                    dt[, events := sum(model$y, na.rm = TRUE)]
+                } else if (!is.null(model$model)) {
+                    outcome_col <- model$model[[1]]
+                    if (is.factor(outcome_col)) {
+                        dt[, events := sum(as.numeric(outcome_col) == 2, na.rm = TRUE)]
+                    } else {
+                        dt[, events := sum(outcome_col, na.rm = TRUE)]
+                    }
+                }
+            }
+        }
+        
+        ## Determine if should exponentiate
+        should_exp <- FALSE
+        is_logistic <- FALSE
+        is_poisson <- FALSE
+        
+        if (model_class == "glm" && !isS4(model)) {
+            family_name <- model$family$family
+            link_name <- model$family$link
             
-            ## Exponentiated versions
-            exp_coef = exp(coefficient),
-            exp_lower = exp(coefficient - z_score * se),
-            exp_upper = exp(coefficient + z_score * se)
+            is_logistic <- family_name == "binomial"
+            is_poisson <- family_name == "poisson" || 
+                (family_name == "quasipoisson")
+            
+            should_exp <- is_logistic || is_poisson || link_name == "log"
+        }
+        
+        ## Add exponentiated coefficients
+        dt[, `:=`(
+            exp_coef = if (should_exp) exp(coefficient) else coefficient,
+            exp_lower = if (should_exp) exp(coef_lower) else coef_lower,
+            exp_upper = if (should_exp) exp(coef_upper) else coef_upper
         )]
         
         if (is_logistic) {
@@ -342,12 +228,12 @@ m2dt <- function(model,
                     AIC = stats::AIC(model),
                     BIC = stats::BIC(model),
                     deviance = stats::deviance(model),
-                    null_deviance = model$null.deviance,
+                    null_deviance = if (!isS4(model)) model$null.deviance else NA,
                     df_residual = stats::df.residual(model)
                 )]
                 
                 ## Add R-squared for non-binomial GLMs
-                if (model$family$family != "binomial") {
+                if (!isS4(model) && model$family$family != "binomial") {
                     dt[, R2 := 1 - (deviance / null_deviance)]
                 }
                 
@@ -355,17 +241,21 @@ m2dt <- function(model,
                 if (is_logistic && keep_qc_stats) {
                     ## C-statistic (if pROC available)
                     if (requireNamespace("pROC", quietly = TRUE)) {
-                        roc_obj <- pROC::roc(model$y, stats::fitted(model), quiet = TRUE)
-                        dt[, c_statistic := as.numeric(pROC::auc(roc_obj))]
+                        if (!isS4(model)) {
+                            roc_obj <- pROC::roc(model$y, stats::fitted(model), quiet = TRUE)
+                            dt[, c_statistic := as.numeric(pROC::auc(roc_obj))]
+                        }
                     }
                     
                     ## Hosmer-Lemeshow test (if ResourceSelection available)
                     if (requireNamespace("ResourceSelection", quietly = TRUE)) {
-                        hl <- ResourceSelection::hoslem.test(model$y, stats::fitted(model), g = 10)
-                        dt[, `:=`(
-                            hoslem_chi2 = hl$statistic,
-                            hoslem_p = hl$p.value
-                        )]
+                        if (!isS4(model)) {
+                            hl <- ResourceSelection::hoslem.test(model$y, stats::fitted(model), g = 10)
+                            dt[, `:=`(
+                                hoslem_chi2 = hl$statistic,
+                                hoslem_p = hl$p.value
+                            )]
+                        }
                     }
                 }
             } else if (model_class == "lm") {
@@ -400,14 +290,14 @@ m2dt <- function(model,
                                        else summ$nevent,
                               coefficient = coef_summary[, "coef"],
                               se = coef_summary[, "se(coef)"],
-                                        # Store both versions
+                              ## Store both versions
                               coef = coef_summary[, "coef"],
                               coef_lower = conf_int[, 1],
                               coef_upper = conf_int[, 2],
                               exp_coef = coef_summary[, "exp(coef)"],
                               exp_lower = exp(conf_int[, 1]),
                               exp_upper = exp(conf_int[, 2]),
-                                        # Primary display columns
+                              ## Primary display columns
                               HR = coef_summary[, "exp(coef)"],
                               CI_lower = exp(conf_int[, 1]),
                               CI_upper = exp(conf_int[, 2]),
@@ -433,8 +323,8 @@ m2dt <- function(model,
                 score_p = summ$sctest[3]
             )]
         }
-        
-    } else if (model_class %in% c("coxme", "lme", "lmer", "glmer")) {
+
+    } else if (model_class %in% c("coxme", "lme", "lmer", "glmer", "glmerMod")) {
         
         ## Mixed effects models
         summ <- summary(model)
@@ -450,8 +340,10 @@ m2dt <- function(model,
                                   model_scope = model_scope %||% "Multivariable",
                                   model_type = model_type_name,
                                   term = names(coef_vec),
-                                  n = model$n[1],
-                                  events = model$n[2],
+                                  n = model$n[2],
+                                  events = model$n[1],
+                                  n_group = NA_real_,
+                                  events_group = NA_real_, 
                                   coefficient = coef_vec,
                                   se = se_vec,
                                   coef = coef_vec,
@@ -468,6 +360,7 @@ m2dt <- function(model,
                               )
             
         } else {
+            
             ## lmer/glmer from lme4
             if (!requireNamespace("lme4", quietly = TRUE))
                 stop("Package 'lme4' required")
@@ -475,7 +368,7 @@ m2dt <- function(model,
             coef_summary <- stats::coef(summ)
             
             ## Determine if should exponentiate
-            should_exp <- model_class == "glmer" && 
+            should_exp <- (model_class %in% c("glmer", "glmerMod")) && 
                 (summ$family == "binomial" || summ$link == "log")
             
             dt <- data.table::data.table(
@@ -488,6 +381,16 @@ m2dt <- function(model,
                                   se = coef_summary[, "Std. Error"]
                               )
             
+            ## For glmer binomial, calculate total events from the response
+            if (model_class %in% c("glmer", "glmerMod") && inherits(model, "merMod")) {
+                if (summ$family == "binomial") {
+                    response_var <- model@resp$y  
+                    if (!is.null(response_var)) {
+                        dt[, events := sum(response_var, na.rm = TRUE)]
+                    }
+                }
+            }
+            
             z_score <- stats::qnorm((1 + conf_level) / 2)
             dt[, `:=`(
                 coef = coefficient,
@@ -499,7 +402,7 @@ m2dt <- function(model,
             )]
             
             ## Add appropriate effect column
-            if (model_class == "glmer" && summ$family == "binomial") {
+            if (model_class %in% c("glmer", "glmerMod") && summ$family == "binomial") {
                 dt[, `:=`(
                     OR = exp_coef,
                     CI_lower = exp_lower,
@@ -520,17 +423,36 @@ m2dt <- function(model,
             }
             
             ## Add test statistics
-            if ("t value" %in% colnames(coef_summary)) {
+            if (ncol(coef_summary) >= 3) {
+                ## Use z-values if available
+                stat_col <- if ("z value" %in% colnames(coef_summary)) {
+                                "z value"
+                            } else if ("t value" %in% colnames(coef_summary)) {
+                                "t value"
+                            } else {
+                                NULL
+                            }
+                
+                if (!is.null(stat_col)) {
+                    dt[, statistic := coef_summary[, stat_col]]
+                } else {
+                    ## Calculate z-statistics manually
+                    dt[, statistic := coefficient / se]
+                }
+                
+                ## Check if p-values are provided
+                p_col <- grep("^Pr\\(", colnames(coef_summary))
+                if (length(p_col) > 0) {
+                    dt[, p_value := coef_summary[, p_col[1]]]
+                } else {
+                    ## Calculate p-values from z/t statistics
+                    dt[, p_value := 2 * (1 - stats::pnorm(abs(statistic)))]
+                }
+            } else {
+                ## No test statistics - calculate manually
                 dt[, `:=`(
-                    statistic = coef_summary[, "t value"],
-                    p_value = if ("Pr(>|t|)" %in% colnames(coef_summary)) 
-                                  coef_summary[, "Pr(>|t|)"] else NA_real_
-                )]
-            } else if ("z value" %in% colnames(coef_summary)) {
-                dt[, `:=`(
-                    statistic = coef_summary[, "z value"],
-                    p_value = if ("Pr(>|z|)" %in% colnames(coef_summary)) 
-                                  coef_summary[, "Pr(>|z|)"] else NA_real_
+                    statistic = coefficient / se,
+                    p_value = 2 * (1 - stats::pnorm(abs(coefficient / se)))
                 )]
             }
         }
@@ -539,314 +461,279 @@ m2dt <- function(model,
         stop("Unsupported model class: ", model_class)
     }
     
-                                        # Filter out excluded terms before any further processing
-    if (length(terms_to_exclude) > 0) {
-        dt <- dt[!term %in% terms_to_exclude]
-    }
+    ## Parse terms into variable and group AFTER creating dt
+    xlevels <- get_model_xlevels(model)
+    
+    ## Parse terms - pass model for coxme special handling
+    parsed <- parse_term(dt$term, xlevels, model)
+    dt[, `:=`(variable = parsed$variable, group = parsed$group)]
 
-    ## Process terms to extract variable and group information - OPTIMIZED
-    if (!("variable" %in% names(dt))) {
-        ## Use vectorized parse_term helper function
-        parsed <- parse_term(dt$term, model$xlevels)
-        dt[, `:=`(variable = parsed$variable, group = parsed$group)]
+    ## Prepare data for group counting
+    if (!is.null(xlevels) || model_class == "coxme") {
+        data_source <- model_data
+        data_dt <- data.table::as.data.table(data_source)
         
-        ## Add n_group and events_group for categorical variables - OPTIMIZED
-        if (!is.null(model$xlevels)) {
+        ## For coxme, reconstruct xlevels from the data if needed
+        if (is.null(xlevels) && model_class == "coxme") {
+            ## Use formulaList$fixed for coxme
+            formula_to_use <- model$formulaList$fixed
             
-            ## Initialize columns
-            dt[, `:=`(n_group = NA_real_, events_group = NA_real_)]
+            ## Get variables
+            all_formula_vars <- all.vars(formula_to_use)
+            term_vars <- all_formula_vars[-1]  # Exclude response
             
-            ## Get data source
-            data_source <- NULL
-            if (!is.null(model$data)) {
-                data_source <- model$data
-            } else if (!is.null(model$model)) {
-                data_source <- model$model
-            }
+            xlevels <- list()
             
-            if (!is.null(data_source)) {
-                ## Convert to data.table for efficient operations
-                data_dt <- data.table::as.data.table(data_source)
-                
-                ## Get outcome variable name once
-                outcome_var <- NULL
-                event_var <- NULL
-                
-                if (model_class == "glm" && model$family$family == "binomial") {
-                    outcome_var <- all.vars(model$formula)[1]
-                } else if (model_class %in% c("coxph", "clogit")) {
-                    outcome_str <- as.character(model$formula)[2]
-                    if (grepl("^Surv\\(", outcome_str)) {
-                        surv_expr <- gsub("Surv\\(|\\)", "", outcome_str)
-                        surv_parts <- trimws(strsplit(surv_expr, ",")[[1]])
-                        event_var <- surv_parts[2]
-                    }
+            for (var_name in term_vars) {
+                if (var_name %in% names(data_dt) && is.factor(data_dt[[var_name]])) {
+                    xlevels[[var_name]] <- levels(data_dt[[var_name]])
                 }
+            }
+        }
+        
+        ## Determine outcome and event variables
+        outcome_var <- NULL
+        event_var <- NULL
+        
+        if (model_class == "glm" && !isS4(model)) {
+            outcome_var <- all.vars(model$formula)[1]
+        } else if (model_class %in% c("glmer", "glmerMod") && inherits(model, "merMod")) {
+            ## For mixed models, get the response variable name from the formula
+            formula_obj <- model@call$formula
+            if (!is.null(formula_obj)) {
+                outcome_var <- all.vars(formula_obj)[1]
+            }
+        } else if (model_class %in% c("coxph", "clogit", "coxme")) {
+            ## For all survival models, use the unified helper function
+            event_var <- get_event_variable(model, model_class)
+        }
+    
+        ## Calculate n_group and events_group for all factor variables at once
+        if (length(xlevels) > 0 && !is.null(data_dt)) {
+            
+            ## Get factor variables that exist in the data
+            factor_vars <- names(xlevels)[names(xlevels) %in% names(data_dt)]
+            
+            if (length(factor_vars) > 0) {
                 
-                ## Process all factor variables at once - VECTORIZED
-                for (var in names(model$xlevels)) {
-                    if (var %in% names(data_dt)) {
-                        ## Vectorized count calculation using data.table
-                        if (!is.null(outcome_var) && outcome_var %in% names(data_dt)) {
-                            ## For binomial: count n and events by level
-                            outcome_col <- data_dt[[outcome_var]]
-                            
-                            ## Handle factor outcomes
-                            if (is.factor(outcome_col)) {
-                                data_dt[, .events_calc := as.numeric(get(outcome_var)) == 2]
-                            } else {
-                                data_dt[, .events_calc := get(outcome_var)]
-                            }
-                            
-                            ## Aggregate in one pass
-                            counts <- data_dt[!is.na(get(var)), .(
-                                                                    n_group = .N,
-                                                                    events_group = sum(.events_calc, na.rm = TRUE)
-                                                                ), by = var]
-                            
-                            ## Clean up temporary column
-                            data_dt[, .events_calc := NULL]
-                            
-                            ## Set names for joining
-                            data.table::setnames(counts, var, "group")
-                            counts[, variable := var]
-                            
-                            ## Join back to main dt using data.table update join
-                            dt[counts, `:=`(
-                                           n_group = i.n_group,
-                                           events_group = i.events_group
-                                       ), on = .(variable, group)]
-                            
-                        } else if (!is.null(event_var) && event_var %in% names(data_dt)) {
-                            ## For survival: count n and events by level
-                            counts <- data_dt[!is.na(get(var)), .(
-                                                                    n_group = .N,
-                                                                    events_group = sum(get(event_var), na.rm = TRUE)
-                                                                ), by = var]
-                            
-                            data.table::setnames(counts, var, "group")
-                            counts[, variable := var]
-                            
-                            dt[counts, `:=`(
-                                           n_group = i.n_group,
-                                           events_group = i.events_group
-                                       ), on = .(variable, group)]
-                            
-                        } else {
-                            ## Just count n by level
-                            counts <- data_dt[!is.na(get(var)), .N, by = var]
-                            data.table::setnames(counts, c("group", "n_group"))
-                            counts[, variable := var]
-                            
-                            dt[counts, n_group := i.n_group, on = .(variable, group)]
-                        }
+                if (!is.null(event_var) && event_var %in% names(data_dt)) {
+                    ## For survival models: calculate all counts at once
+                    
+                    ## Stack all factor variables into long format
+                    all_counts <- rbindlist(lapply(factor_vars, function(var) {
+                        data_dt[!is.na(get(var)), .(
+                                                      variable = var,
+                                                      group = as.character(get(var)),
+                                                      n_group = .N,
+                                                      events_group = sum(get(event_var), na.rm = TRUE)
+                                                  ), by = get(var)][, get := NULL]
+                    }))
+                    
+                    ## Single join to update all counts at once
+                    dt[all_counts, `:=`(
+                                       n_group = i.n_group,
+                                       events_group = i.events_group
+                                   ), on = .(variable, group)]
+                    
+                } else if (!is.null(outcome_var) && outcome_var %in% names(data_dt)) {
+                    ## For GLM/GLMER models: calculate all counts at once
+                    
+                    ## Prepare outcome calculation
+                    outcome_col <- data_dt[[outcome_var]]
+                    if (is.factor(outcome_col)) {
+                        data_dt[, .events_calc := as.numeric(outcome_col) == 2]
+                    } else {
+                        data_dt[, .events_calc := outcome_col]
                     }
+                    
+                    ## Stack all factor variables into long format
+                    all_counts <- rbindlist(lapply(factor_vars, function(var) {
+                        data_dt[!is.na(get(var)), .(
+                                                      variable = var,
+                                                      group = as.character(get(var)),
+                                                      n_group = .N,
+                                                      events_group = sum(.events_calc, na.rm = TRUE)
+                                                  ), by = get(var)][, get := NULL]
+                    }))
+                    
+                    ## Clean up temporary column
+                    data_dt[, .events_calc := NULL]
+                    
+                    ## Single join to update all counts
+                    dt[all_counts, `:=`(
+                                       n_group = i.n_group,
+                                       events_group = i.events_group
+                                   ), on = .(variable, group)]
+                    
+                } else {
+                    ## No outcome/event variable: just count n
+                    all_counts <- rbindlist(lapply(factor_vars, function(var) {
+                        data_dt[!is.na(get(var)), .(
+                                                      variable = var,
+                                                      group = as.character(get(var)),
+                                                      n_group = .N
+                                                  ), by = get(var)][, get := NULL]
+                    }))
+                    
+                    ## Single join to update counts
+                    dt[all_counts, n_group := i.n_group, on = .(variable, group)]
                 }
             }
         }
     }
-
+    
     ## Add reference rows for factor variables while maintaining original order
-    if (add_reference_rows && !is.null(model$xlevels)) {
-        
+    xlevels_ref <- xlevels
+
+    ## Create all reference rows at once (vectorized approach)
+    if (!is.null(xlevels_ref) && add_reference_rows) {
+
         ## Add reference column to existing data
         dt[, reference := ""]
         
         ## Pre-calculate all reference level counts at once for efficiency
         ref_counts <- list()
-        
-        data_source <- NULL
-        if (!is.null(model$data)) {
-            data_source <- model$data
-        } else if (!is.null(model$model)) {
-            data_source <- model$model
-        }
-        
-        if (!is.null(data_source)) {
-            data_dt <- data.table::as.data.table(data_source)
-            
-            ## Get outcome/event info once
-            outcome_var <- NULL
-            event_var <- NULL
-            
-            if (model_class == "glm" && model$family$family == "binomial") {
-                outcome_var <- all.vars(model$formula)[1]
-            } else if (model_class %in% c("coxph", "clogit")) {
-                outcome_str <- as.character(model$formula)[2]
-                if (grepl("^Surv\\(", outcome_str)) {
-                    surv_expr <- gsub("Surv\\(|\\)", "", outcome_str)
-                    surv_parts <- trimws(strsplit(surv_expr, ",")[[1]])
-                    event_var <- surv_parts[2]
+
+        ## Pre-calculate all reference level counts from all_counts
+        ref_counts <- list()
+
+        ## Extract reference level counts from all_counts if it exists
+        if (exists("all_counts") && !is.null(all_counts) && nrow(all_counts) > 0) {
+            for (var in names(xlevels_ref)) {
+                ref_level <- xlevels_ref[[var]][1]
+                ref_row_data <- all_counts[variable == var & group == ref_level]
+                if (nrow(ref_row_data) > 0) {
+                    ref_counts[[var]] <- ref_row_data[, .(n_group = n_group, events_group = events_group)]
                 }
             }
-            
-            ## Calculate reference counts for all factors at once
-            for (var in names(model$xlevels)) {
-                if (var %in% names(data_dt)) {
-                    ref_level <- model$xlevels[[var]][1]
-                    
-                    if (!is.null(outcome_var) && outcome_var %in% names(data_dt)) {
-                        outcome_col <- data_dt[[outcome_var]]
-                        if (is.factor(outcome_col)) {
-                            data_dt[, .events_calc := as.numeric(get(outcome_var)) == 2]
+        } else {
+            ## Fallback: calculate directly from data if all_counts doesn't exist
+            if (!is.null(data_dt)) {
+                for (var in names(xlevels_ref)) {
+                    if (var %in% names(data_dt)) {
+                        ref_level <- xlevels_ref[[var]][1]
+                        
+                        if (!is.null(event_var) && event_var %in% names(data_dt)) {
+                            ref_counts[[var]] <- data_dt[get(var) == ref_level & !is.na(get(var)), .(
+                                                                                                       n_group = .N,
+                                                                                                       events_group = sum(get(event_var), na.rm = TRUE)
+                                                                                                   )]
                         } else {
-                            data_dt[, .events_calc := get(outcome_var)]
+                            ref_counts[[var]] <- data_dt[get(var) == ref_level & !is.na(get(var)), .(
+                                                                                                       n_group = .N
+                                                                                                   )]
                         }
-                        
-                        ref_counts[[var]] <- data_dt[get(var) == ref_level & !is.na(get(var)), .(
-                                                                                                   n_group = .N,
-                                                                                                   events_group = sum(.events_calc, na.rm = TRUE)
-                                                                                               )]
-                        
-                        data_dt[, .events_calc := NULL]
-                        
-                    } else if (!is.null(event_var) && event_var %in% names(data_dt)) {
-                        ref_counts[[var]] <- data_dt[get(var) == ref_level & !is.na(get(var)), .(
-                                                                                                   n_group = .N,
-                                                                                                   events_group = sum(get(event_var), na.rm = TRUE)
-                                                                                               )]
-                        
-                    } else {
-                        ref_counts[[var]] <- data_dt[get(var) == ref_level & !is.na(get(var)), .(
-                                                                                                   n_group = .N
-                                                                                               )]
                     }
                 }
             }
         }
-        
-        ## Build final table while maintaining original order
-        ## Create a list to hold the final ordered result
-        final_rows <- list()
-        
-        ## Track which terms have been processed
-        processed_terms <- character(0)
-        
-        ## Process each term in the original order
-        for (i in seq_len(nrow(dt))) {
-            current_term <- dt$term[i]
+
+        ## Build all reference rows in a list
+        ref_rows_list <- lapply(names(xlevels_ref), function(var) {
+            ref_level <- xlevels_ref[[var]][1]
             
-            ## Skip if already processed
-            if (current_term %in% processed_terms) next
-            
-            ## Interaction terms contain ":" and should be treated as continuous-like terms
-            if (grepl(":", current_term, fixed = TRUE)) {
-                ## This is an interaction term - add it as-is
-                final_rows[[length(final_rows) + 1]] <- dt[term == current_term]
-                processed_terms <- c(processed_terms, current_term)
-                next
+            ## Get counts for this reference level
+            if (var %in% names(ref_counts) && nrow(ref_counts[[var]]) > 0) {
+                n_val <- ref_counts[[var]]$n_group[1]
+                events_val <- if ("events_group" %in% names(ref_counts[[var]])) {
+                                  ref_counts[[var]]$events_group[1]
+                              } else {
+                                  NA_real_
+                              }
+            } else {
+                n_val <- NA_real_
+                events_val <- NA_real_
             }
             
-            ## Check if this term belongs to a factor variable
-            factor_var <- NULL
-            for (var in names(model$xlevels)) {
-                if (grepl(paste0("^", var), current_term)) {
-                    factor_var <- var
-                    break
-                }
-            }
+            ## Find first matching row to use as template
+            template_idx <- which(dt$variable == var)[1]
             
-            if (!is.null(factor_var)) {
-                ## This is a factor variable
-                levels_order <- model$xlevels[[factor_var]]
-                ref_level <- levels_order[1]
+            if (!is.na(template_idx)) {
+                ## Copy the template row
+                ref_row <- dt[template_idx, ]
                 
-                ## Get reference counts from pre-calculated values
-                ref_n_group <- NA_real_
-                ref_events_group <- NA_real_
-                if (!is.null(ref_counts[[factor_var]])) {
-                    if (nrow(ref_counts[[factor_var]]) > 0) {
-                        ref_n_group <- ref_counts[[factor_var]]$n_group[1]
-                        if ("events_group" %in% names(ref_counts[[factor_var]])) {
-                            ref_events_group <- ref_counts[[factor_var]]$events_group[1]
-                        }
-                    }
-                }
-                
-                ## Create reference row with correct counts
-                ref_row <- dt[1, ]
+                ## Update all necessary columns at once
                 ref_row[, `:=`(
-                    term = paste0(factor_var, ref_level),
-                    variable = factor_var,
+                    term = paste0(var, ref_level),
                     group = ref_level,
-                    n_group = ref_n_group,
-                    events_group = ref_events_group,
+                    n = ifelse(is.na(n_val), n[1], n_val),
+                    events = ifelse(is.na(events_val), events[1], events_val),
+                    n_group = n_val,
+                    events_group = events_val,
                     coefficient = 0,
                     se = NA_real_,
+                    coef = 0,
+                    coef_lower = NA_real_,
+                    coef_upper = NA_real_,
+                    exp_coef = 1,
+                    exp_lower = NA_real_,
+                    exp_upper = NA_real_,
                     statistic = NA_real_,
                     p_value = NA_real_,
-                    CI_lower = NA_real_,
-                    CI_upper = NA_real_,
                     reference = reference_label
                 )]
                 
-                ## Set effect estimates for reference
-                if ("OR" %in% names(dt)) ref_row[, OR := 1]
-                if ("HR" %in% names(dt)) ref_row[, HR := 1]
-                if ("RR" %in% names(dt)) ref_row[, RR := 1]
-                if ("Estimate" %in% names(dt)) ref_row[, Estimate := 0]
-                
-                ## Add reference row first
-                final_rows[[length(final_rows) + 1]] <- ref_row
-                
-                ## Now add all other levels for this factor in order
-                for (level in levels_order[-1]) {
-                    level_term <- paste0(factor_var, level)
-                    level_row <- dt[term == level_term]
-                    if (nrow(level_row) > 0) {
-                        final_rows[[length(final_rows) + 1]] <- level_row
-                        processed_terms <- c(processed_terms, level_term)
-                    }
+                ## Update model-specific columns
+                if ("HR" %in% names(ref_row)) {
+                    ref_row[, `:=`(HR = 1, CI_lower = NA_real_, CI_upper = NA_real_)]
+                }
+                if ("OR" %in% names(ref_row)) {
+                    ref_row[, `:=`(OR = 1, CI_lower = NA_real_, CI_upper = NA_real_)]
                 }
                 
-            } else {
-                ## This is not a factor variable (e.g., continuous)
-                final_rows[[length(final_rows) + 1]] <- dt[term == current_term]
-                processed_terms <- c(processed_terms, current_term)
+                return(ref_row)
             }
-        }
+            return(NULL)
+        })
         
-        ## Combine all rows
-        dt <- data.table::rbindlist(final_rows, fill = TRUE)
+        ## Remove NULL entries and bind all reference rows at once
+        ref_rows_list <- ref_rows_list[!sapply(ref_rows_list, is.null)]
+
+        if (length(ref_rows_list) > 0) {
+            ref_rows_dt <- rbindlist(ref_rows_list, use.names = TRUE, fill = TRUE)
+            
+            ## Combine main dt and reference rows
+            dt <- rbind(dt, ref_rows_dt, use.names = TRUE, fill = TRUE)
+            
+            ## Sort to put reference rows in correct positions
+            ## Within each variable, reference row comes first
+            dt[, .is_ref := reference == reference_label]
+            setorder(dt, variable, -.is_ref, group)
+            dt[, .is_ref := NULL]
+        }
     }
 
-    ## Add significance markers
+    ## Update n and events with group-specific counts where available  
+    dt[!is.na(n_group), n := n_group]
+    dt[!is.na(events_group), events := events_group]
+    
+    ## Filter excluded terms
+    if (!is.null(terms_to_exclude)) {
+        dt <- dt[!term %in% terms_to_exclude]
+    }
+    
+    ## Add significance indicators
     dt[, `:=`(
         sig = data.table::fcase(
                               is.na(p_value), "",
                               p_value < 0.001, "***",
                               p_value < 0.01, "**",
                               p_value < 0.05, "*",
-                              p_value < 0.10, ".",
+                              p_value < 0.1, ".",
                               default = ""
                           ),
         sig_binary = !is.na(p_value) & p_value < 0.05
     )]
     
-    ## Reorder columns to put variable and level early
-    col_order <- c("model_scope", "model_type", "term", "variable", "group")
-
-    ## Add count columns if they exist
-    for (col in c("n", "n_group", "events", "events_group")) {
-        if (col %in% names(dt)) {
-            col_order <- c(col_order, col)
-        }
-    }
-
-    ## Add remaining columns
-    other_cols <- setdiff(names(dt), col_order)
-    data.table::setcolorder(dt, c(col_order, other_cols))
-
-    ## Remove term column entirely
-    dt[, term := NULL]
-    
-    ## Set attributes for model info
+    ## Add attributes
     data.table::setattr(dt, "model_class", model_class)
-    data.table::setattr(dt, "model_family", if (model_class == "glm") model$family$family else NA)
-    data.table::setattr(dt, "conf_level", conf_level)
-
-    ## Force data.table to finalize
-    dt[]
+    data.table::setattr(dt, "formula_str", deparse(stats::formula(model)))
     
+    if (model_class == "glm") {
+        data.table::setattr(dt, "model_family", model$family$family)
+        data.table::setattr(dt, "model_link", model$family$link)
+    }
+    
+    dt[]
     return(dt)
 }
