@@ -495,9 +495,20 @@ parameters.</p></dd>
 <span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"lm"</span>,</span></span>
 <span class="r-in"><span>    labels <span class="op">=</span> <span class="va">clintrial_labels</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(jsub, SDenv, parent.frame()):</span> object 'events_group' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">linear_model</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'linear_model' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Multivariable Linear Model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: bmi ~ age + sex + smoking</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> N = 833</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Variable   Group      n Multivariable Estimate (95% CI) p-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;char&gt;  &lt;char&gt; &lt;char&gt;                          &lt;char&gt;  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:    Age (years)       -    833               0.03 (0.00, 0.06)   0.039</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:            Sex  Female    474                       reference       -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                   Male    376             -0.06 (-0.75, 0.64)   0.876</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Smoking Status   Never    382                       reference       -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                Current    188             -0.06 (-0.94, 0.82)   0.889</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                 Former    263             -0.66 (-1.45, 0.14)   0.105</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 8: Poisson regression for count data</span></span></span>
 <span class="r-in"><span><span class="va">poisson_model</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span></span></span>
