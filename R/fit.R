@@ -487,8 +487,8 @@ fit <- function(data,
     }
     
     ## Convert to readable format using m2dt
-    raw_data <- m2dt(data,
-                     model, 
+    raw_data <- m2dt(data = data,
+                     model = model, 
                      conf_level = conf_level,
                      keep_qc_stats = keep_qc_stats,
                      include_intercept = FALSE,

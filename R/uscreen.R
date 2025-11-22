@@ -443,7 +443,8 @@ uscreen <- function(data,
         }
         
         ## Get raw results using m2dt
-        raw_result <- m2dt(model,
+        raw_result <- m2dt(data = data,
+                           model = model,
                            conf_level = conf_level,
                            keep_qc_stats = FALSE,
                            include_intercept = FALSE,

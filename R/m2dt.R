@@ -603,7 +603,11 @@ m2dt <- function(data,
                 ref_level <- xlevels_ref[[var]][1]
                 ref_row_data <- all_counts[variable == var & group == ref_level]
                 if (nrow(ref_row_data) > 0) {
-                    ref_counts[[var]] <- ref_row_data[, .(n_group = n_group, events_group = events_group)]
+                    if ("events_group" %in% names(ref_row_data)) {
+                        ref_counts[[var]] <- ref_row_data[, .(n_group = n_group, events_group = events_group)]
+                    } else {
+                        ref_counts[[var]] <- ref_row_data[, .(n_group = n_group)]
+                    }
                 }
             }
         } else {
@@ -705,7 +709,9 @@ m2dt <- function(data,
 
     ## Update n and events with group-specific counts where available  
     dt[!is.na(n_group), n := n_group]
-    dt[!is.na(events_group), events := events_group]
+    if ("events_group" %in% names(dt)) {
+        dt[!is.na(events_group), events := events_group]
+    }
     
     ## Filter excluded terms
     if (!is.null(terms_to_exclude)) {
