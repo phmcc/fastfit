@@ -470,7 +470,13 @@ glmforest <- function(model, data = NULL,
         stop("Package 'grid' is required but not installed.")
     }
     
-    stopifnot(inherits(model, "glm"))
+    ## Check model class - support both GLM and GLMER
+    is_lme4 <- inherits(model, c("glmerMod", "merMod"))
+    is_glm <- inherits(model, "glm")
+    
+    if (!is_glm && !is_lme4) {
+        stop("Model must be either a glm or glmerMod/merMod object")
+    }
     
     ## Internally work in inches
     if (!is.null(plot_width) && units != "in") {
@@ -479,15 +485,31 @@ glmforest <- function(model, data = NULL,
 
     ## Determine if we should exponentiate based on link function
     if(is.null(exponentiate)) {
-        link_func <- model$family$link
+        if (is_lme4) {
+            ## For lme4 models, extract family info differently
+            family_obj <- model@resp$family
+            link_func <- family_obj$link
+        } else {
+            ## For regular GLMs
+            link_func <- model$family$link
+        }
         exponentiate <- link_func %in% c("logit", "log", "cloglog")
     }
     
     ## Set effect label based on model family and link
     if(is.null(effect_label)) {
-        if(model$family$family == "binomial" && model$family$link == "logit") {
+        if (is_lme4) {
+            family_obj <- model@resp$family
+            family_name <- family_obj$family
+            link_func <- family_obj$link
+        } else {
+            family_name <- model$family$family
+            link_func <- model$family$link
+        }
+        
+        if(family_name == "binomial" && link_func == "logit") {
             effect_label <- "Odds Ratio"
-        } else if(model$family$link == "log") {
+        } else if(link_func == "log") {
             effect_label <- "Risk Ratio"
         } else if(exponentiate) {
             effect_label <- "Exp(Coefficient)"
@@ -496,52 +518,138 @@ glmforest <- function(model, data = NULL,
         }
     }
     
-    ## Get data
+    ## Get data - we need both the original data and the model data
+    ## The model data excludes NAs and is what we should use for counts
+    if (is_lme4) {
+        ## For lme4 models, the model frame contains the complete cases
+        model_data <- model@frame
+    } else {
+        ## For regular GLMs, use model$model which contains complete cases
+        model_data <- model$model
+    }
+    
+    ## Get the original data for reference (if provided)
     if(is.null(data)){
         warning("The `data` argument is not provided. Data will be extracted from model fit.")
-        data <- model$data
-        if (is.null(data))
-            data <- model$model
-        if (is.null(data))
-            stop("The `data` argument should be provided either to glmforest or glm.")
+        data <- model_data  # Use the model data as the base
     }
     
     ## Convert to data.table if not already
     if(!data.table::is.data.table(data)) {
         data <- data.table::as.data.table(data)
     }
+    if(!data.table::is.data.table(model_data)) {
+        model_data <- data.table::as.data.table(model_data)
+    }
     
-    terms <- attr(model$terms, "dataClasses")[-1]
+    ## Extract terms based on model type
+    if (is_lme4) {
+        ## For lme4 models, we need to work with the fixed effects only
+        ## Get the fixed effects formula
+        fixed_formula <- lme4::nobars(stats::formula(model))
+        
+        ## Get variable names from the fixed formula (excluding outcome)
+        var_names <- all.vars(fixed_formula)[-1]  # Remove outcome variable
+        
+        ## Get the model frame for determining variable types
+        model_frame <- model@frame
+        
+        ## Create terms object similar to GLM structure
+        terms <- sapply(var_names, function(v) {
+            if (v %in% names(model_frame)) {
+                if (is.factor(model_frame[[v]])) "factor"
+                else if (is.character(model_frame[[v]])) "character"
+                else "numeric"
+            } else if (v %in% names(data)) {
+                if (is.factor(data[[v]])) "factor"
+                else if (is.character(data[[v]])) "character"
+                else "numeric"
+            } else "numeric"
+        }, USE.NAMES = TRUE)
+        
+    } else {
+        ## For regular GLMs
+        terms <- attr(model$terms, "dataClasses")[-1]
+    }
     
-    ## Extract coefficients
-    coef_summary <- summary(model)$coefficients
-    conf_int <- stats::confint(model)
+    ## Extract coefficients and confidence intervals
+    if (is_lme4) {
+        ## For lme4 models
+        coef_summary <- summary(model)$coefficients
+        
+        ## Calculate confidence intervals manually for lme4
+        ## Using Wald confidence intervals
+        coef_vals <- lme4::fixef(model)
+        se_vals <- sqrt(diag(as.matrix(vcov(model))))
+        z_crit <- qnorm(0.975)
+        
+        conf_int <- cbind(
+            lower = coef_vals - z_crit * se_vals,
+            upper = coef_vals + z_crit * se_vals
+        )
+        rownames(conf_int) <- names(coef_vals)
+        
+        ## Extract z values - for lme4, we calculate them
+        z_values <- coef_summary[, "Estimate"] / coef_summary[, "Std. Error"]
+        p_values <- 2 * pnorm(abs(z_values), lower.tail = FALSE)
+        
+    } else {
+        ## For regular GLMs
+        coef_summary <- summary(model)$coefficients
+        conf_int <- stats::confint(model)
+        z_values <- coef_summary[, "z value"]
+        p_values <- coef_summary[, "Pr(>|z|)"]
+    }
     
     ## Remove intercept if present
     if("(Intercept)" %in% rownames(coef_summary)) {
         intercept_idx <- which(rownames(coef_summary) == "(Intercept)")
         coef_summary <- coef_summary[-intercept_idx, , drop = FALSE]
         conf_int <- conf_int[-intercept_idx, , drop = FALSE]
+        z_values <- z_values[-intercept_idx]
+        p_values <- p_values[-intercept_idx]
     }
     
+    ## Create coefficient data table
     coef <- data.table::data.table(
                             term = rownames(coef_summary),
                             estimate = coef_summary[, "Estimate"],
                             std_error = coef_summary[, "Std. Error"],
-                            statistic = coef_summary[, "z value"],
-                            p_value = coef_summary[, "Pr(>|z|)"],
+                            statistic = z_values,
+                            p_value = p_values,
                             conf_low = conf_int[, 1],
                             conf_high = conf_int[, 2]
                         )
     
     ## Get model statistics
-    gmodel <- list(
-        nobs = nobs(model),
-        null_deviance = model$null.deviance,
-        residual_deviance = model$deviance,
-        AIC = stats::AIC(model),
-        family = paste0(model$family$family, " (", model$family$link, " link)")
-    )
+    if (is_lme4) {
+        ## For lme4 models
+        gmodel <- list(
+            nobs = nrow(model@frame),
+            null_deviance = NA,  # Not directly available in lme4
+            residual_deviance = NA,  # Not directly available in lme4
+            AIC = stats::AIC(model),
+            family = paste0(model@resp$family$family, " (", model@resp$family$link, " link)")
+        )
+        
+        ## Calculate deviances if possible
+        tryCatch({
+                                        # Some lme4 models have deviance method
+            gmodel$residual_deviance <- stats::deviance(model)
+        }, error = function(e) {
+                                        # Keep as NA if not available
+        })
+        
+    } else {
+        ## For regular GLMs
+        gmodel <- list(
+            nobs = nobs(model),
+            null_deviance = model$null.deviance,
+            residual_deviance = model$deviance,
+            AIC = stats::AIC(model),
+            family = paste0(model$family$family, " (", model$family$link, " link)")
+        )
+    }
     
     ## Calculate total observations and percentage analyzed
     total_obs <- nrow(data)
@@ -553,20 +661,47 @@ glmforest <- function(model, data = NULL,
                                    sprintf("%.1f%%", gmodel$pct_analyzed), ")")
     gmodel$AIC_formatted <- format(round(gmodel$AIC, 2), big.mark = ",", scientific = FALSE, nsmall = 2)
     
-    ## Calculate pseudo R-squared (McFadden's)
-    gmodel$pseudo_r2 <- 1 - (model$deviance / model$null.deviance)
+    ## Calculate pseudo R-squared (McFadden's) - only if deviances available
+    if (!is.na(gmodel$null_deviance) && !is.na(gmodel$residual_deviance)) {
+        gmodel$pseudo_r2 <- 1 - (gmodel$residual_deviance / gmodel$null_deviance)
+    } else {
+        gmodel$pseudo_r2 <- NA
+    }
+    
+    ## Extract xlevels (factor levels) based on model type
+    if (is_lme4) {
+        ## For lme4 models, extract from the model frame
+        frame_data <- model@frame
+        xlevels <- list()
+        
+        for (var_name in names(terms)) {
+            if (terms[var_name] %in% c("factor", "character")) {
+                if (var_name %in% names(frame_data) && is.factor(frame_data[[var_name]])) {
+                    xlevels[[var_name]] <- levels(frame_data[[var_name]])
+                } else if (var_name %in% names(model_data) && is.factor(model_data[[var_name]])) {
+                    xlevels[[var_name]] <- levels(model_data[[var_name]])
+                }
+            }
+        }
+        
+        if (length(xlevels) == 0) xlevels <- NULL
+        
+    } else {
+        ## For regular GLMs
+        xlevels <- model$xlevels
+    }
     
     ## Extract statistics for every variable - preserving order
     all_terms <- lapply(seq_along(terms), function(i){
         var <- names(terms)[i]
         
         if (terms[i] %in% c("factor", "character")) {
-            ## Get the factor levels from the model's xlevels (proper order)
-            if(var %in% names(model$xlevels)) {
-                factor_levels <- model$xlevels[[var]]
+            ## Get the factor levels from xlevels (proper order)
+            if(!is.null(xlevels) && var %in% names(xlevels)) {
+                factor_levels <- xlevels[[var]]
                 
-                ## Create data table with proper levels
-                level_counts <- data[!is.na(get(var)), .N, by = var]
+                ## Create data table with proper levels FROM MODEL DATA
+                level_counts <- model_data[!is.na(get(var)), .N, by = var]
                 data.table::setnames(level_counts, c("level", "Freq"))
                 
                 ## Ensure all levels are present
@@ -580,58 +715,91 @@ glmforest <- function(model, data = NULL,
                 all_levels_dt[, var := var]
                 all_levels_dt[, pos := .I]
                 all_levels_dt[, var_order := i]
-                all_levels_dt[, .(var, level, Freq, pos, var_order)]
+                return(all_levels_dt[, .(var, level, Freq, pos, var_order)])
             } else {
-                ## Fallback for variables not in xlevels
-                adf <- data[!is.na(get(var)), .N, by = var]
+                ## Fallback for variables not in xlevels - use MODEL DATA
+                adf <- model_data[!is.na(get(var)), .N, by = var]
                 data.table::setnames(adf, old = c(var, "N"), new = c("level", "Freq"))
                 adf[, var := var]
                 adf[, pos := .I]
                 adf[, var_order := i]
-                adf[, .(var, level, Freq, pos, var_order)]
+                return(adf[, .(var, level, Freq, pos, var_order)])
             }
         }
         else if (terms[i] == "numeric") {
-            data.table::data.table(var = var, level = "-", Freq = sum(!is.na(data[[var]])), 
-                                   pos = 1, var_order = i)
+            ## For numeric variables, return a single row - use MODEL DATA
+            return(data.table::data.table(
+                                   var = var, 
+                                   level = "-", 
+                                   Freq = sum(!is.na(model_data[[var]])), 
+                                   pos = 1, 
+                                   var_order = i
+                               ))
         }
         else {
+            ## Other cases
             vars = grep(paste0("^", var, "*."), coef$term, value=TRUE)
-            data.table::data.table(var = vars, level = "", Freq = nrow(data),
-                                   pos = seq_along(vars), var_order = i)
+            return(data.table::data.table(
+                                   var = vars, 
+                                   level = "", 
+                                   Freq = nrow(model_data),  # Use model_data row count
+                                   pos = seq_along(vars), 
+                                   var_order = i
+                               ))
         }
     })
     
+    ## Remove any NULL entries from the list
+    all_terms <- all_terms[!sapply(all_terms, is.null)]
+    
+    ## Bind all terms together
     all_terms_df <- data.table::rbindlist(all_terms)
     data.table::setnames(all_terms_df, c("var", "level", "N", "pos", "var_order"))
 
     ## Add events for binomial models
-    if (model$family$family == "binomial") {
-        outcome_var <- all.vars(model$formula)[1]
+    if (is_lme4) {
+        family_name <- model@resp$family$family
+    } else {
+        family_name <- model$family$family
+    }
+    
+    if (family_name == "binomial") {
+        outcome_data <- NULL
         
-        if (!outcome_var %in% names(data)) {
-            warning(paste("Outcome variable", outcome_var, "not found in data. Events column will not be created."))
-            all_terms_df[, Events := NA_integer_]
+        if (is_lme4) {
+            ## For lme4 models, extract outcome from the response
+            outcome_data <- model@resp$y
         } else {
-            outcome_data <- data[[outcome_var]]
+            ## For regular GLMs, get outcome from model data
+            outcome_var <- all.vars(stats::formula(model))[1]
             
-            if (is.factor(outcome_data)) {
-                outcome_binary <- as.numeric(outcome_data) == 2
+            if (!outcome_var %in% names(model_data)) {
+                warning(paste("Outcome variable", outcome_var, "not found in model data. Events column will not be created."))
             } else {
-                outcome_binary <- outcome_data
+                outcome_data <- model_data[[outcome_var]]
+                
+                if (is.factor(outcome_data)) {
+                    outcome_data <- as.numeric(outcome_data) == 2
+                }
             }
-            
+        }
+        
+        if (!is.null(outcome_data)) {
             all_terms_df[, Events := {
                 if (level == "-") {
-                    sum(outcome_binary, na.rm = TRUE)
+                                        # For continuous variables, total events
+                    sum(outcome_data, na.rm = TRUE)
                 } else {
-                    if (var %in% names(data)) {
-                        sum(outcome_binary[data[[var]] == level], na.rm = TRUE)
+                                        # For factor levels, events within that level
+                    if (var %in% names(model_data)) {
+                        sum(outcome_data[model_data[[var]] == level], na.rm = TRUE)
                     } else {
                         NA_integer_
                     }
                 }
             }, by = seq_len(nrow(all_terms_df))]
+        } else {
+            all_terms_df[, Events := NA_integer_]
         }
     } else {
         all_terms_df[, Events := NA_integer_]
@@ -699,6 +867,7 @@ glmforest <- function(model, data = NULL,
         
         all_terms_df <- data.table::rbindlist(processed_rows, fill = TRUE)
         
+        ## Restore inds, N, and Events values for condensed/indented rows
         for (i in 1:nrow(all_terms_df)) {
             current_var <- all_terms_df$var[i]
             
@@ -763,10 +932,12 @@ glmforest <- function(model, data = NULL,
     
     ## Select columns
     to_show <- to_show[, .(var, level, N, Events, p_value, estimate, conf_low, conf_high, pos, var_order, shade_group)]
-    
+
+    print(to_show)
+
     ## Format the values based on exponentiate setting
     to_show_exp_clean <- data.table::copy(to_show)
-    
+
     ## Create formatted columns for display
     if(exponentiate) {
         to_show_exp_clean[, effect := data.table::fifelse(is.na(estimate), 
@@ -776,68 +947,68 @@ glmforest <- function(model, data = NULL,
                                                                     "",
                                                                     data.table::fifelse(is.na(estimate), 
                                                                                         ref_label,
-                                                       format(round(exp(estimate), digits), nsmall = digits)))]
+                                                                                        format(round(exp(estimate), digits), nsmall = digits)))]
         to_show_exp_clean[, conf_low_formatted := data.table::fifelse(is.na(conf_low), 
-                                                         NA_character_,
-                                                         format(round(exp(conf_low), digits), nsmall = digits))]
+                                                                      NA_character_,
+                                                                      format(round(exp(conf_low), digits), nsmall = digits))]
         to_show_exp_clean[, conf_high_formatted := data.table::fifelse(is.na(conf_high), 
-                                                          NA_character_,
-                                                          format(round(exp(conf_high), digits), nsmall = digits))]
+                                                                       NA_character_,
+                                                                       format(round(exp(conf_high), digits), nsmall = digits))]
     } else {
         to_show_exp_clean[, effect := estimate]
         to_show_exp_clean[, effect_formatted := data.table::fifelse(is.na(N) & is.na(estimate),
-                                                       "",
-                                                data.table::fifelse(is.na(estimate), 
-                                                       ref_label,
-                                                       format(round(estimate, digits), nsmall = digits)))]
+                                                                    "",
+                                                                    data.table::fifelse(is.na(estimate), 
+                                                                                        ref_label,
+                                                                                        format(round(estimate, digits), nsmall = digits)))]
         to_show_exp_clean[, conf_low_formatted := data.table::fifelse(is.na(conf_low), 
-                                                         NA_character_,
-                                                         format(round(conf_low, digits), nsmall = digits))]
+                                                                      NA_character_,
+                                                                      format(round(conf_low, digits), nsmall = digits))]
         to_show_exp_clean[, conf_high_formatted := data.table::fifelse(is.na(conf_high), 
-                                                          NA_character_,
-                                                          format(round(conf_high, digits), nsmall = digits))]
+                                                                       NA_character_,
+                                                                       format(round(conf_high, digits), nsmall = digits))]
     }
-    
+
     ## Format p-values
     to_show_exp_clean[, p_formatted := data.table::fifelse(is.na(p_value), 
-                                              NA_character_,
-                                       data.table::fifelse(p_value < 0.001, 
-                                              "< 0.001",
-                                              format(round(p_value, 3), nsmall = 3)))]
-    
+                                                           NA_character_,
+                                                           data.table::fifelse(p_value < 0.001, 
+                                                                               "< 0.001",
+                                                                               format(round(p_value, 3), nsmall = 3)))]
+
     ## Create the combined effect string with expression for italic p
     effect_abbrev <- if(effect_label == "Odds Ratio") "aOR" else if(effect_label == "Risk Ratio") "aRR" else "Coef"
 
     to_show_exp_clean[, effect_string_expr := data.table::fifelse(
-                            is.na(N) & is.na(estimate),
-                            "''",
-                            fcase(
-                                is.na(estimate), paste0("'", ref_label, "'"),
-                                
-                                p_value < 0.001 & !exponentiate & (conf_low < 0 | conf_high < 0),
-                                paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
-                                       conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
-                                
-                                p_value < 0.001,
-                                paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
-                                       conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
-                                
-                                !exponentiate & (conf_low < 0 | conf_high < 0),
-                                paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
-                                       conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
-                                
-                                default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
-                                                 conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
-                            )
-                        )]
-    
+                                                              is.na(N) & is.na(estimate),
+                                                              "''",
+                                                              fcase(
+                                                                  is.na(estimate), paste0("'", ref_label, "'"),
+                                                                  
+                                                                  p_value < 0.001 & !exponentiate & (conf_low < 0 | conf_high < 0),
+                                                                  paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                                                         conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                                                  
+                                                                  p_value < 0.001,
+                                                                  paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                                                         conf_high_formatted, "); '*~italic(p)~'< 0.001'"),
+                                                                  
+                                                                  !exponentiate & (conf_low < 0 | conf_high < 0),
+                                                                  paste0("'", effect_formatted, " (", conf_low_formatted, ", ", 
+                                                                         conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'"),
+                                                                  
+                                                                  default = paste0("'", effect_formatted, " (", conf_low_formatted, "-", 
+                                                                                   conf_high_formatted, "); '*~italic(p)~'= ", p_formatted, "'")
+                                                              )
+                                                          )]
+
     ## Format N and events with thousands separator
     to_show_exp_clean[, n_formatted := data.table::fifelse(is.na(N), "", format(N, big.mark = ",", scientific = FALSE))]
     to_show_exp_clean[, events_formatted := data.table::fifelse(is.na(Events), "", format(Events, big.mark = ",", scientific = FALSE))]
-    
+
     ## Clean up variable names for display
     to_show_exp_clean[, var_display := as.character(var)]
-    
+
     if (indent_groups || condense_table) {
         to_show_exp_clean[, var_display := var]
         
@@ -887,18 +1058,18 @@ glmforest <- function(model, data = NULL,
     if (!indent_groups) {
         to_show_exp_clean[duplicated(var), var_display := ""]
     }
-    
+
     ## Handle missing estimates for plotting
     if(exponentiate) {
         to_show_exp_clean[is.na(estimate), estimate := 0]
     } else {
         to_show_exp_clean[is.na(estimate), estimate := 0]
     }
-    
+
     ## Reorder (flip) - but maintain the variable grouping
     to_show_exp_clean <- to_show_exp_clean[order(nrow(to_show_exp_clean):1)]
     to_show_exp_clean[, x_pos := .I]
-    
+
     ## Calculate plot ranges with better handling of extreme cases
     if(exponentiate) {
         rangeb <- range(to_show$conf_low, to_show$conf_high, na.rm = TRUE)
@@ -1022,7 +1193,7 @@ glmforest <- function(model, data = NULL,
     ## Font sizes
     annot_font <- font_size * annot_size
     header_font <- font_size * header_size
-    
+
     ## Custom ticks data
     ticks_df <- data.frame(
         x = -0.5,
@@ -1030,12 +1201,12 @@ glmforest <- function(model, data = NULL,
         y = breaks,
         yend = breaks
     )
-    
+
     ## Format deviance values
     null_dev_formatted <- format(round(gmodel$null_deviance, 2), nsmall = 2)
     resid_dev_formatted <- format(round(gmodel$residual_deviance, 2), nsmall = 2)
     pseudo_r2_formatted <- format(round(gmodel$pseudo_r2, 3), nsmall = 3)
-    
+
     ## Create the plot
     if(exponentiate) {
         p <- ggplot2::ggplot(to_show_exp_clean, ggplot2::aes(x_pos, exp(estimate))) +
@@ -1272,42 +1443,42 @@ glmforest <- function(model, data = NULL,
                                        size = annot_font)
                  )
              }} +
-                        
-                        ## Events column (conditional)
-                        {if (show_events) {
-                             list(
-                                 ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_events,
-                                                   label = "Events", fontface = "bold", hjust = 0.5,
-                                                   size = header_font),
-                                 ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_events,
-                                                   label = to_show_exp_clean$events_formatted, hjust = 0.5,
-                                                   size = annot_font)
-                             )
-                         }} +
-                        
-                        ## Effect column
-                        ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.4, y = y_or,
-                                          label = paste0("bold('", effect_abbrev, " (95% CI); '*bolditalic(p)*'-value')"),
-                                          hjust = 0, size = header_font, parse = TRUE) +
-                        
-                        ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_or,
-                                          label = to_show_exp_clean$effect_string_expr, hjust = 0,
-                                          size = annot_font, parse = TRUE) +
-                        
-                        ## X-axis label
-                        ggplot2::annotate(geom = "text", x = -1.5, y = reference_value,
-                                          label = effect_label, fontface = "bold",
-                                          hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
-                        
-                        ## Model statistics at bottom
-                        ggplot2::annotate(geom = "text", x = 0.5, y = y_variable,
-                                          label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
-                                                         "\nModel: ", gmodel$family,
-                                                         "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
-                                                         "\nPseudo R^2: ", pseudo_r2_formatted,
-                                                         "\nAIC: ", gmodel$AIC_formatted),
-                                          size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
-                }
+            
+            ## Events column (conditional)
+            {if (show_events) {
+                 list(
+                     ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.5, y = y_events,
+                                       label = "Events", fontface = "bold", hjust = 0.5,
+                                       size = header_font),
+                     ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_events,
+                                       label = to_show_exp_clean$events_formatted, hjust = 0.5,
+                                       size = annot_font)
+                 )
+             }} +
+            
+            ## Effect column
+            ggplot2::annotate(geom = "text", x = max(to_show_exp_clean$x_pos) + 1.4, y = y_or,
+                              label = paste0("bold('", effect_abbrev, " (95% CI); '*bolditalic(p)*'-value')"),
+                              hjust = 0, size = header_font, parse = TRUE) +
+            
+            ggplot2::annotate(geom = "text", x = to_show_exp_clean$x_pos, y = y_or,
+                              label = to_show_exp_clean$effect_string_expr, hjust = 0,
+                              size = annot_font, parse = TRUE) +
+            
+            ## X-axis label
+            ggplot2::annotate(geom = "text", x = -1.5, y = reference_value,
+                              label = effect_label, fontface = "bold",
+                              hjust = 0.5, vjust = 2, size = annot_font * 1.5) +
+            
+            ## Model statistics at bottom
+            ggplot2::annotate(geom = "text", x = 0.5, y = y_variable,
+                              label = paste0("Observations analyzed: ", gmodel$nobs_with_pct,
+                                             "\nModel: ", gmodel$family,
+                                             "\nNull (Residual) Deviance: ", null_dev_formatted, " (", resid_dev_formatted, ")",
+                                             "\nPseudo R^2: ", pseudo_r2_formatted,
+                                             "\nAIC: ", gmodel$AIC_formatted),
+                              size = annot_font * 0.8, hjust = 0, vjust = 1.2, fontface = "italic")
+    }
 
     ## Convert units back for output if needed
     if (units != "in") {
@@ -1320,7 +1491,7 @@ glmforest <- function(model, data = NULL,
         message(sprintf("Recommended plot dimensions: width = %.1f %s, height = %.1f %s",
                         rec_width, units, rec_height, units))
     }
-    
+
     ## Add recommended dimensions as an attribute
     attr(p, "recommended_dims") <- list(width = rec_width, height = rec_height)
 

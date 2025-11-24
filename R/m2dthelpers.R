@@ -62,6 +62,40 @@ get_model_data <- function(model) {
 #' Detect if model is univariable or multivariable
 #' @keywords internal
 detect_model_type <- function(model) {
+    ## For glmer/glmerMod models, handle random effects specially
+    if (inherits(model, c("glmerMod", "merMod"))) {
+                                        # Get the fixed effects formula (excluding random effects)
+        if (!is.null(model@call$formula)) {
+            formula_str <- as.character(model@call$formula)[3]  # RHS of formula
+                                        # Remove random effects terms (anything with |)
+            formula_str <- gsub("\\([^|]*\\|[^)]*\\)", "", formula_str)
+                                        # Clean up extra spaces and plus signs
+            formula_str <- gsub("\\s*\\+\\s*\\+", " +", formula_str)
+            formula_str <- gsub("^\\s*\\+\\s*", "", formula_str)
+            formula_str <- gsub("\\s*\\+\\s*$", "", formula_str)
+            
+                                        # Split by + to get terms
+            terms <- trimws(strsplit(formula_str, "\\+")[[1]])
+            terms <- terms[terms != ""]
+            
+                                        # Count unique base variables (handle interactions)
+            unique_vars <- character()
+            for (term in terms) {
+                if (grepl(":", term)) {
+                                        # Interaction term - split and add components
+                    components <- trimws(strsplit(term, ":")[[1]])
+                    unique_vars <- c(unique_vars, components)
+                } else {
+                    unique_vars <- c(unique_vars, term)
+                }
+            }
+            unique_vars <- unique(unique_vars)
+            
+            return(data.table::fifelse(length(unique_vars) == 1, "Univariable", "Multivariable"))
+        }
+    }
+    
+    ## Original code for other model types
     ## Get coefficient names once
     coef_names <- names(stats::coef(model))
     
@@ -220,7 +254,7 @@ parse_term <- function(terms, xlevels = NULL, model = NULL) {
             if (length(xlevels) == 0) xlevels <- NULL
         }
     }
-   
+    
     if (!is.null(xlevels) && length(xlevels) > 0) {
         ## OPTIMIZED: Vectorized approach
         xlevel_names <- names(xlevels)

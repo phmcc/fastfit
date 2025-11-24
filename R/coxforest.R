@@ -433,7 +433,7 @@ coxforest <- function(model, data = NULL,
         stop("Package 'grid' is required but not installed.")
     }
     
-    stopifnot(inherits(model, "coxph"))
+    stopifnot(inherits(model, c("coxph", "coxme")))
 
     ## Internally work in inches
     if (!is.null(plot_width) && units != "in") {
@@ -474,9 +474,93 @@ coxforest <- function(model, data = NULL,
     ## Filter out strata() and cluster() terms - these are not predictors to plot
     terms <- terms[!grepl("strata|cluster", names(terms))]
 
-    ## Extract coefficients
-    coef_summary <- summary(model)$coefficients
-    conf_int <- stats::confint(model)
+    ## Extract coefficients based on model type
+    model_class <- class(model)[1]
+
+    ## For coxme models, data is mandatory
+    if (model_class == "coxme" && is.null(data)) {
+        stop("The 'data' argument is required for coxme models.\n",
+             "Usage: coxforest(model, data = your_data, ...)")
+    }
+
+    ## Initialize coef variables
+    coef_summary <- NULL
+    conf_int <- NULL
+    
+    if (model_class == "coxme") {
+        ## Special handling for coxme models
+        
+        ## Extract fixed effects coefficients
+        fixed_effects <- coxme::fixef(model)
+        
+        ## Extract standard errors from variance matrix
+        n_fixed <- length(fixed_effects)
+        se_values <- sqrt(diag(as.matrix(model$variance))[1:n_fixed])
+        
+        ## Calculate z-statistics and p-values
+        z_values <- fixed_effects / se_values
+        p_values <- 2 * pnorm(abs(z_values), lower.tail = FALSE)
+        
+        ## Calculate 95% confidence intervals
+        z_mult <- qnorm(0.975)
+        conf_low <- fixed_effects - z_mult * se_values
+        conf_high <- fixed_effects + z_mult * se_values
+        
+        ## Create coefficient summary in expected format
+        coef_summary <- cbind(
+            coef = fixed_effects,
+            "se(coef)" = se_values,
+            z = z_values,
+            "Pr(>|z|)" = p_values
+        )
+        rownames(coef_summary) <- names(fixed_effects)
+        
+        ## Create conf_int in expected format
+        conf_int <- cbind(conf_low, conf_high)
+        colnames(conf_int) <- c("2.5 %", "97.5 %")
+        rownames(conf_int) <- names(fixed_effects)
+        
+        ## Also need to set nevent and create xlevels as before...
+        model$nevent <- model$n[1]
+
+        ## For coxme, systematically extract from formula
+        ## Parse formula to get predictor variables
+        formula_chr <- as.character(model$formulaList$fixed)
+        rhs_formula <- formula_chr[3]
+
+        ## Split by + to get individual terms
+        predictor_terms <- trimws(strsplit(rhs_formula, "\\+")[[1]])
+
+        ## Remove random effects terms like (1|site)
+        predictor_vars <- predictor_terms[!grepl("\\(.*\\|.*\\)", predictor_terms)]
+
+        ## Create terms
+        terms <- sapply(predictor_vars, function(v) {
+            if (v %in% names(data)) {
+                if (is.factor(data[[v]])) "factor"
+                else if (is.numeric(data[[v]])) "numeric"
+                else class(data[[v]])[1]
+            } else {
+                "numeric"  # Default
+            }
+        })
+
+        ## Create xlevels (keep your existing code)
+        if (is.null(model$xlevels)) {
+            model$xlevels <- list()
+            for (var in predictor_vars) {
+                if (var %in% names(data) && is.factor(data[[var]])) {
+                    model$xlevels[[var]] <- levels(data[[var]])
+                }
+            }
+        }
+        
+    } else {
+        ## Standard coxph extraction
+        coef_summary <- summary(model)$coefficients
+        conf_int <- stats::confint(model)
+    }    
+
     
     coef <- data.table::data.table(
                             term = rownames(coef_summary),
@@ -489,15 +573,43 @@ coxforest <- function(model, data = NULL,
                         )
     
     ## Get model statistics
-    conc_values <- summary(model)$concordance
-    gmodel <- list(
-        nevent = model$nevent,
-        p_value_log = as.numeric(summary(model)$sctest["pvalue"]),
-        AIC = stats::AIC(model),
-        concordance = as.numeric(conc_values["C"]),
-        concordance.se = as.numeric(conc_values["se(C)"])
-    )
-    
+    if (model_class == "coxme") {
+        ## Calculate AIC for coxme
+        ## AIC = -2 * loglik + 2 * df
+        coxme_aic <- if (!is.null(model$loglik) && length(model$loglik) >= 3) {
+                         -2 * model$loglik[3] + 2 * model$df[2]  # Using penalized loglik
+                  } else {
+                         NA
+                     }
+        
+        ## Calculate likelihood ratio test p-value
+        p_value_log <- if (!is.null(model$loglik) && length(model$loglik) >= 2) {
+                           lr_stat <- 2 * (model$loglik[2] - model$loglik[1])
+                           lr_df <- model$df[1]
+                           pchisq(lr_stat, df = lr_df, lower.tail = FALSE)
+                       } else {
+                           NA
+                       }
+        
+        gmodel <- list(
+            nevent = model$n[1],
+            p_value_log = p_value_log,
+            AIC = coxme_aic,
+            concordance = NA,  # Not easily available for coxme
+            concordance.se = NA
+        )
+    } else {
+        ## Standard coxph statistics
+        conc_values <- summary(model)$concordance
+        gmodel <- list(
+            nevent = model$nevent,
+            p_value_log = as.numeric(summary(model)$sctest["pvalue"]),
+            AIC = stats::AIC(model),
+            concordance = as.numeric(conc_values["C"]),
+            concordance.se = as.numeric(conc_values["se(C)"])
+        )
+    }
+
     ## Calculate total events in original data and percentage analyzed
     formula_terms <- all.vars(model$formula)
     if (length(formula_terms) >= 2) {
@@ -558,11 +670,11 @@ coxforest <- function(model, data = NULL,
                           } else {
                               "Concordance Index: Not available"
                           }
-    
+
     ## Extract statistics for every variable - preserving order
     all_terms <- lapply(seq_along(terms), function(i){
         var <- names(terms)[i]
-        
+
         if (terms[i] %in% c("factor", "character")) {
             ## Get the factor levels from the model's xlevels (proper order)
             if(var %in% names(model$xlevels)) {
@@ -609,7 +721,11 @@ coxforest <- function(model, data = NULL,
     data.table::setnames(all_terms_df, c("var", "level", "N", "pos", "var_order"))
 
     ## Add events
-    formula_terms <- all.vars(model$formula)
+    if (model_class == "coxme") {
+        formula_terms <- all.vars(model$formulaList$fixed)
+    } else {
+        formula_terms <- all.vars(model$formula)
+    }
     
     if (length(formula_terms) >= 2) {
         ## Assuming standard Surv(time, status) format

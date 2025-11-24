@@ -730,6 +730,78 @@ m2dt <- function(data,
                           ),
         sig_binary = !is.na(p_value) & p_value < 0.05
     )]
+
+    ## Reorder variables to match original predictor order if available
+    predictors_order <- attr(model, "predictors")
+    if (!is.null(predictors_order) && "variable" %in% names(dt)) {
+        
+        ## Create order based on predictors
+        ## First, handle regular predictors (may include random effects notation)
+        clean_predictors <- character()
+        for (pred in predictors_order) {
+            ## Remove random effects notation if present
+            if (grepl("\\|", pred)) {
+                ## This is a random effect term like "(1|site)", skip it
+                next
+            } else {
+                clean_predictors <- c(clean_predictors, pred)
+            }
+        }
+        
+        ## Get unique variables in dt
+        dt_vars <- unique(dt$variable)
+        
+        ## Separate into ordered and unordered variables
+        ordered_vars <- character()
+        for (pred in clean_predictors) {
+            ## Check if this predictor appears in dt_vars
+            if (pred %in% dt_vars) {
+                ordered_vars <- c(ordered_vars, pred)
+            } else {
+                ## Check if it's a factor variable (any dt_vars start with this pred)
+                factor_matches <- dt_vars[startsWith(dt_vars, pred)]
+                if (length(factor_matches) > 0) {
+                    ## Add the base variable name
+                    for (match in factor_matches) {
+                        if (!(match %in% ordered_vars)) {
+                            ordered_vars <- c(ordered_vars, match)
+                        }
+                    }
+                }
+            }
+        }
+        
+        ## Handle interaction terms - they should come after main effects
+        interaction_vars <- dt_vars[grepl(":", dt_vars, fixed = TRUE)]
+        main_effect_vars <- setdiff(dt_vars, interaction_vars)
+        
+        ## Get main effects that aren't already ordered
+        unordered_main <- setdiff(main_effect_vars, ordered_vars)
+        
+        ## Final order: ordered variables, unordered main effects, interactions
+        final_order <- c(ordered_vars, unordered_main, interaction_vars)
+        
+        ## Remove any duplicates while preserving order
+        final_order <- final_order[!duplicated(final_order)]
+        
+        ## Create ordering factor
+        dt[, variable := factor(variable, levels = final_order)]
+        
+        ## Sort by variable (which now has the correct factor levels)
+        ## Within each variable, maintain the existing group order
+        setkey(dt, variable)
+        
+        ## Convert back to character
+        dt[, variable := as.character(variable)]
+        
+        ## If reference rows exist, ensure they come first within each variable
+        if ("reference" %in% names(dt)) {
+            dt[, .temp_var_order := match(variable, final_order)]
+            dt[, .is_ref := reference != ""]
+            setorder(dt, .temp_var_order, -.is_ref, group)
+            dt[, c(".temp_var_order", ".is_ref") := NULL]
+        }
+    }
     
     ## Add attributes
     data.table::setattr(dt, "model_class", model_class)
